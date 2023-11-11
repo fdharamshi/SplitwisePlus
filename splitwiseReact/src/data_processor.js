@@ -1,6 +1,8 @@
 export default function process_data(data) {
     let expenses = {};
     let categories = {};
+    const localUserId = JSON.parse(window.localStorage.getItem("user"))['user']['id'].toString(); // Retrieve user ID from local storage
+
     data['expenses'].forEach(expense => {
         // TODO: Should not be deleted
         if (expense['payment'] === false && expense['deleted_at'] === null) {
@@ -15,10 +17,7 @@ export default function process_data(data) {
                 expenses[monthYearStr][expense['category']['name']] = 0.0;
             }
             expense['users'].forEach(user => {
-
-                // TODO: Use Local Storage User ID
-
-                if (user['user']['id'].toString() === "15746973") {
+                if (user['user']['id'].toString() === localUserId) {
                     expenses[monthYearStr][expense['category']['name']] = expenses[monthYearStr][expense['category']['name']] + parseFloat(user['owed_share']);
                 }
             })
@@ -26,7 +25,7 @@ export default function process_data(data) {
     });
     // console.log(categories);
     // console.log("### ### ###")
-    // console.log(expenses);
+    console.log(expenses);
 
     return expenses;
 }

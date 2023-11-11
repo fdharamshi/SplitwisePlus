@@ -16,6 +16,20 @@ function Dashboard() {
     const [categories, setCategories] = useState([]);
     const navigate = useNavigate();
 
+    const currentDate = new Date();
+    const currentMonthYear = `${currentDate.toLocaleString('default', {month: 'long'})}-${currentDate.getFullYear()}`;
+    const [selectedMonth, setSelectedMonth] = useState(currentMonthYear);
+
+    // Function to generate month options for the dropdown
+    const generateMonthOptions = () => {
+        const months = [];
+        for (let i = 0; i < 24; i++) {
+            let month = new Date();
+            month.setMonth(currentDate.getMonth() - i);
+            months.push(`${month.toLocaleString('default', {month: 'long'})}-${month.getFullYear()}`);
+        }
+        return months.map(month => <option key={month} value={month}>{month}</option>);
+    };
 
     axios.defaults.headers = {
         'Content-Type': 'application/json',
@@ -64,9 +78,13 @@ function Dashboard() {
 
             {/*TODO: Render only when everything is fetched*/}
 
-            {fetched && `Total Expense: $${Object.values(expensesData['October-2023']).reduce((partialSum, a) => partialSum + a, 0)}`}
+            <select className="monthDropdown" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+                {generateMonthOptions()}
+            </select>
 
-            {fetched && ApC({data: expensesData['October-2023'], month: "October"})}
+            {fetched && `Total Expense: $${Object.values(expensesData[selectedMonth]).reduce((partialSum, a) => partialSum + a, 0).toFixed(2)}`}
+
+            {fetched && ApC({data: expensesData[selectedMonth], month: selectedMonth})}
             <SelfExpense categories={categories}/>
         </div>
     );

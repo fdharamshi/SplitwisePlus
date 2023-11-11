@@ -73,7 +73,7 @@ export const ApC = ({data, month}) => {
 
             },
             title: {
-                text: 'Expense for Month, October 2023',
+                text: 'Expense for Month, ' + month,
                 floating: false,
                 offsetY: 330,
                 align: 'center',
