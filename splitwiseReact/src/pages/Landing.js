@@ -1,13 +1,7 @@
-import logo from './logo.svg';
-import './App.css';
+import '../styles/App.css';
 import React, {useEffect, useRef, useState} from 'react';
-import axios from "axios";
-
-import { fetch_data } from './splitwise_api';
-import PieChart from './Pie';
-import process_data from "./data_processor";
-import {getUser} from "./SplitwiseAPI";
 import {useNavigate} from "react-router-dom";
+import {getUser} from "../services/SplitwiseAPI";
 
 function Landing() {
 
@@ -19,7 +13,7 @@ function Landing() {
     useEffect(() => {
         const localUser = window.localStorage.getItem("user");
         const localApiKey = window.localStorage.getItem("API_KEY");
-        if(localUser !== null && localApiKey !== null) {
+        if (localUser !== null && localApiKey !== null) {
             navigate('/Dashboard');
         }
     }, [user]);
@@ -28,7 +22,7 @@ function Landing() {
         setUser({});
         const retrievedUser = await getUser(API_KEY);
 
-        if(retrievedUser.user !== undefined) {
+        if (retrievedUser.user !== undefined) {
             setUser(prevUser => ({...retrievedUser}));
 
             window.localStorage.setItem("user", JSON.stringify(retrievedUser));
@@ -47,7 +41,9 @@ function Landing() {
                 <h1>Expenses</h1>
                 <h2>Hello {user.user !== undefined ? user.user.first_name : "Invalid API_KEY"}</h2>
                 <input type="text" placeholder="Enter API KEY" ref={API_KEY_Input}/>
-                <button onClick={()=>{handleFetchExpenses(API_KEY_Input.current.value)}}>
+                <button onClick={() => {
+                    handleFetchExpenses(API_KEY_Input.current.value)
+                }}>
                     Fetch Expenses
                 </button>
             </div>

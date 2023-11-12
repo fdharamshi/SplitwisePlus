@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {createSelfExpense, createSelfGroup, getAllGroups, getTodaysSelfExpenses} from "../SplitwiseAPI";
+import {createSelfExpense, createSelfGroup, getAllGroups, getTodaysSelfExpenses} from "../services/SplitwiseAPI";
 
 import './SelfExpense.css';
 import ExpenseRow from "./ExpenseRow"; // Import the CSS file

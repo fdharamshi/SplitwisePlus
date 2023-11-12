@@ -1,11 +1,11 @@
-import './App.css';
+import '../styles/App.css';
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
-import process_data from "./data_processor";
 import {useNavigate} from "react-router-dom";
-import {getAllCategories, getAllExpenses} from "./SplitwiseAPI";
-import SelfExpense from "./Components/SelfExpense";
-import {ApC} from "./ApexCharts/ApC";
+import process_data from "../services/data_processor";
+import {getAllCategories, getAllExpenses} from "../services/SplitwiseAPI";
+import ApC from "../ApexCharts/ApC";
+import SelfExpense from "../Components/SelfExpense";
 
 function Dashboard() {
 
