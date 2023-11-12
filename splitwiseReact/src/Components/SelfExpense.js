@@ -8,7 +8,7 @@ export const SelfExpense = (props) => {
 
     const [groups, setGroups] = useState({});
     const [selfGroup, setSelfGroup] = useState({});
-    const [selectedCategory, setSelectedCategory] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('18');
     const [todaysExpenses, setTodaysExpenses] = useState([]);
 
     useEffect(() => {
@@ -41,7 +41,6 @@ export const SelfExpense = (props) => {
     };
 
     const findTodaysExpense = async () => {
-        console.log("called");
         const getSelfToday = (await getTodaysSelfExpenses(window.localStorage.getItem("API_KEY")))['expenses'];
         const todaysEx = [];
         getSelfToday.forEach(expense => {
@@ -64,7 +63,25 @@ export const SelfExpense = (props) => {
         setSelfGroup(group);
     }
 
+    const renderOptions = (categories) => {
+        return categories.map(category => (
+            <React.Fragment key={category.id}>
+                <option value={category.id} disabled style={{fontWeight: 'bold'}}>
+                    {category.name}
+                </option>
+                {category.subcategories && category.subcategories.map(sub => (
+                    <option key={sub.id} value={sub.id} style={{paddingLeft: '20px'}}>
+                        {sub.name}
+                    </option>
+                ))}
+            </React.Fragment>
+        ));
+    };
+
     const addSelfExpense = async () => {
+
+        // TODO: If self group could not be found, alert and do not proceed.
+
         let amount = addExpenseAmount.current.value;
         let description = addExpenseName.current.value;
         let category_id = selectedCategory;
@@ -96,14 +113,8 @@ export const SelfExpense = (props) => {
                         <h3>Add an expense</h3>
                         <div>
                             <label htmlFor="dropdown">Select an Option:</label>
-                            <select id="dropdown" value={selectedCategory}
-                                    onChange={(event) => setSelectedCategory(event.target.value)}>
-                                <option value="">Select an option</option>
-                                {props.categories.map((option) => (
-                                    <option key={option.id} value={option.id}>
-                                        {option.name}
-                                    </option>
-                                ))}
+                            <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+                                {props.categories?.categories && renderOptions(props.categories.categories)}
                             </select>
                         </div>
                         <input type="text" placeholder="Description" ref={addExpenseName}/>

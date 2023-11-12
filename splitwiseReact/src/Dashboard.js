@@ -48,8 +48,8 @@ function Dashboard() {
 
     const parseCategories = async () => {
         let allCategories = await getAllCategories(window.localStorage.getItem("API_KEY"));
-        const arrayOfCategories = allCategories['categories'].flatMap(mainCategory => mainCategory['subcategories']);
-        setCategories(arrayOfCategories);
+        // const arrayOfCategories = allCategories['categories'].flatMap(mainCategory => mainCategory['subcategories']);
+        setCategories(allCategories);
     }
 
     useEffect(() => {
