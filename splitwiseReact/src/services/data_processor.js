@@ -4,7 +4,6 @@ export default function process_data(data) {
     const localUserId = JSON.parse(window.localStorage.getItem("user"))['user']['id'].toString(); // Retrieve user ID from local storage
 
     data['expenses'].forEach(expense => {
-        // TODO: Should not be deleted
         if (expense['payment'] === false && expense['deleted_at'] === null) {
             const dateStr = expense.date;
             const date = new Date(dateStr);
