@@ -5,8 +5,6 @@ import {getUser} from "../services/SplitwiseAPI";
 
 function Landing() {
 
-    // wt4h7bJzdGQEa9KhN6HuCTAwU1eQEoBHxFARO5MZ
-
     const [user, setUser] = useState({});
     const navigate = useNavigate();
 
