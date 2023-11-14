@@ -10,7 +10,6 @@ import SelfExpense from "../Components/SelfExpense";
 function Dashboard() {
 
     const [expensesData, setExpensesData] = useState();
-    const [isLoading, setIsLoading] = useState(false);
     const [fetched, setFetched] = useState(false);
     const [user, setUser] = useState({});
     const [categories, setCategories] = useState([]);
@@ -70,10 +69,6 @@ function Dashboard() {
                 <h1>Expenses
                     {user !== null && <div>For {user?.user?.first_name}</div>}
                 </h1>
-                {/*<input type="text" placeholder="Enter something" />*/}
-                {/*<button onClick={handleFetchExpenses} disabled={isLoading}>*/}
-                {/*  {isLoading ? 'Loading...' : 'Fetch Expenses'}*/}
-                {/*</button>*/}
             </div>
 
             {/*TODO: Render only when everything is fetched*/}
