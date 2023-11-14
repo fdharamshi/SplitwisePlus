@@ -17,12 +17,18 @@ export const GroupBalances = ({groupsData}) => {
         }, 0);
     };
 
+    // TODO: Add Sorting
+
     return (
         <div className="group-balances-container">
             {groupsData.map((group) => {
                 const userBalance = calculateUserBalance(group.members, localUserId);
                 const balanceDisplay = userBalance.toFixed(2);
-                const owedDisplay = userBalance > 0 ? `you are owed $${balanceDisplay}` : `you owe $${Math.abs(balanceDisplay)}`;
+                const isOwed = userBalance > 0;
+                const balanceClassName = isOwed ? 'owed' : 'owes';
+                const owedDisplay = isOwed
+                    ? `you are owed $${balanceDisplay}`
+                    : `you owe $${Math.abs(balanceDisplay)}`;
 
                 return (
                     <div key={group.id} className="group-balance">
@@ -30,7 +36,7 @@ export const GroupBalances = ({groupsData}) => {
                             <img src={group.avatar.small} alt={group.name}/>
                             <div className="group-name">{group.name}</div>
                         </div>
-                        <div className="group-balance-amount">{owedDisplay}</div>
+                        <div className={`group-balance-amount ${balanceClassName}`}>{owedDisplay}</div>
                     </div>
                 );
             })}

@@ -47,3 +47,11 @@
         padding-top: 10px;
     }
 }
+
+.owed {
+    color: green;
+}
+
+.owes {
+    color: red;
+}
