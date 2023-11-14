@@ -3,9 +3,10 @@ import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import process_data from "../services/data_processor";
-import {getAllCategories, getAllExpenses} from "../services/SplitwiseAPI";
+import {getAllCategories, getAllExpenses, getAllFriends, getAllGroups} from "../services/SplitwiseAPI";
 import ApC from "../ApexCharts/ApC";
 import SelfExpense from "../Components/SelfExpense";
+import {GroupBalances} from "../Components/Groups";
 
 function Dashboard() {
 
@@ -13,6 +14,10 @@ function Dashboard() {
     const [fetched, setFetched] = useState(false);
     const [user, setUser] = useState({});
     const [categories, setCategories] = useState([]);
+
+    const [allFriends, setAllFriends] = useState([]);
+    const [allGroups, setAllGroups] = useState([]);
+
     const navigate = useNavigate();
 
     const currentDate = new Date();
@@ -41,6 +46,8 @@ function Dashboard() {
     const updateExpenses = async () => {
         setFetched(false);
         let expenses = process_data(await getAllExpenses(window.localStorage.getItem("API_KEY")));
+        setAllGroups((await getAllGroups(window.localStorage.getItem("API_KEY")))['groups']);
+        setAllFriends((await getAllFriends(window.localStorage.getItem("API_KEY")))['friends']);
         setExpensesData(expenses);
         setFetched(true);
     }
@@ -80,7 +87,8 @@ function Dashboard() {
             {fetched && `Total Expense: $${Object.values(expensesData[selectedMonth]).reduce((partialSum, a) => partialSum + a, 0).toFixed(2)}`}
 
             {fetched && ApC({data: expensesData[selectedMonth], month: selectedMonth})}
-            <SelfExpense categories={categories}/>
+            <SelfExpense categories={categories} groups={allGroups}/>
+            <GroupBalances groupsData={allGroups}/>
         </div>
     );
 }

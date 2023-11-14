@@ -1,0 +1,49 @@
+.group-balances-container {
+    font-family: Arial, sans-serif;
+}
+
+.group-balance {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #e1e1e1; /* Divider between items */
+}
+
+.group-balance:last-child {
+    border-bottom: none; /* Remove border from the last item */
+}
+
+.group-info {
+    display: flex;
+    align-items: center;
+}
+
+.group-info img {
+    width: 50px; /* Adjust the size as needed */
+    height: 50px; /* Adjust the size as needed */
+    border-radius: 50%; /* Circular image */
+    margin-right: 10px;
+}
+
+.group-name {
+    margin-right: 20px; /* Space between name and balance */
+}
+
+.group-balance-amount {
+    margin-left: auto; /* Pushes the balance to the extreme right */
+    padding-left: 20px; /* Ensures some space before the border */
+}
+
+/* You might want to add responsiveness if needed */
+@media (max-width: 768px) {
+    .group-balance {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .group-balance-amount {
+        margin-left: 0;
+        padding-top: 10px;
+    }
+}

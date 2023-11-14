@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {createSelfExpense, createSelfGroup, getAllGroups, getTodaysSelfExpenses} from "../services/SplitwiseAPI";
+import {createSelfExpense, createSelfGroup, getTodaysSelfExpenses} from "../services/SplitwiseAPI";
 
 import './SelfExpense.css';
 import ExpenseRow from "./ExpenseRow"; // Import the CSS file
@@ -19,8 +19,9 @@ export const SelfExpense = (props) => {
     }, []);
 
     const handleFetchExpenses = async () => {
-        let groups = await getAllGroups(window.localStorage.getItem("API_KEY"));
-        setGroups(groups);
+        // let groups = await getAllGroups(window.localStorage.getItem("API_KEY"));
+        // setGroups(groups);
+        setGroups(props.groups);
         findSelfGroup();
     };
 

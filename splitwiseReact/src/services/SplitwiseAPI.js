@@ -11,8 +11,6 @@ axios.defaults.headers = {
 export const getRequest = async (API_KEY, url) => {
     let response = await axios
         .post("http://127.0.0.1:8000/forward-get", {
-            // "url": "https://secure.splitwise.com/api/v3.0/get_current_user",
-            // "url": "https://secure.splitwise.com/api/v3.0/get_expenses?limit=0",
             "url": url,
             "API_KEY": API_KEY
         });
@@ -54,7 +52,11 @@ export const getTodaysSelfExpenses = async (API_KEY) => {
 
 export const getAllGroups = async (API_KEY) => {
     let groups = await getRequest(API_KEY, "https://secure.splitwise.com/api/v3.0/get_groups?limit=0");
+    return groups;
+}
 
+export const getAllFriends = async (API_KEY) => {
+    let groups = await getRequest(API_KEY, "https://secure.splitwise.com/api/v3.0/get_friends");
     return groups;
 }
 
