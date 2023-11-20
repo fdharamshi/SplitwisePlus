@@ -3,7 +3,7 @@ import Tesseract from 'tesseract.js';
 
 // TODO: Add different types of price formats
 
-const Itemization = () => {
+const Itemization = (props) => {
     const [image, setImage] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [items, setItems] = useState([]);
@@ -24,43 +24,44 @@ const Itemization = () => {
             }
         ).then(({data: {text}}) => {
             setIsProcessing(false);
-            console.log(text);
+            // console.log(text);
             // Here you need to implement the logic to parse the text and extract items and prices
             // This is a placeholder for demonstration
             const receiptItems = parseReceipt(text);
             setItems(receiptItems);
+            props.callback(receiptItems);
         });
     };
 
-    // Placeholder function to parse OCR result
     const parseReceipt = (text) => {
         const lines = text.split('\n');
 
-        // A regex to match potential currency formats, e.g., "$9.99", "9.99 USD", "€9,99"
-        const priceRegex = /([€$£]?)(\d+[\.,]\d{2})\s*([€$£]?)/;
+        // A regex to match a line with an optional quantity at the start, followed by item description, and ending with a price.
+        const itemLineRegex = /^(\d+\s+)?(.+?)\s+(\d+[\.,]\d{2})$/;
 
-        // A regex to identify lines that likely don't contain items - such as totals, dates, etc.
-        const nonItemRegex = /(total|subtotal|tax|tip|date|cash|change|visa|mastercard|thank you)/i;
+        // A regex to identify lines that likely don't contain items - such as headers, totals, etc.
+        const nonItemLineRegex = /(subtotal|total|tax|tip|balance due|server|guests|date|time|change|cash|card|pay|cc|check|^\s*$)/i;
 
-        // Array to hold our extracted items
         const items = [];
 
-        lines.forEach(line => {
-            // Check if line is likely a non-item line
-            if (nonItemRegex.test(line)) return;
+        lines.forEach((line) => {
+            // Trim the line to remove whitespace from the beginning and end
+            line = line.trim();
 
-            // Find price in line
-            const priceMatch = line.match(priceRegex);
+            // Skip non-item lines, empty lines, and lines that don't contain a price
+            if (nonItemLineRegex.test(line) || !itemLineRegex.test(line)) return;
 
-            if (priceMatch) {
-                // Extracting the item name by removing the price from the line
-                const priceIndex = line.indexOf(priceMatch[0]);
-                const item = line.substring(0, priceIndex).trim();
-                const price = priceMatch[2].replace(',', '.'); // Replace comma with dot for standardization
+            // Match the line against our item line regex
+            const match = line.match(itemLineRegex);
+            if (match) {
+                // If a quantity is found, use it; otherwise, default to 1
+                const quantity = match[1] ? parseInt(match[1].trim(), 10) : 1;
+                const name = match[2].trim();
+                const price = match[3].replace(',', '.'); // Replace comma with dot for standardization
 
-                // Only add items that have a non-empty name and a valid price format
-                if (item && !isNaN(parseFloat(price))) {
-                    items.push({item, price});
+                // Check for a valid item name and price format
+                if (name && price && !isNaN(parseFloat(price))) {
+                    items.push({quantity, name, price});
                 }
             }
         });
@@ -74,16 +75,6 @@ const Itemization = () => {
             <button onClick={handleUpload} disabled={isProcessing}>
                 {isProcessing ? 'Processing...' : 'Upload and Process Receipt'}
             </button>
-            {items.length > 0 && (
-                <ul>
-                    {items.map((item, index) => (
-                        <li key={index}>
-                            {item.item}: {item.price}
-                        </li>
-                    ))}
-                </ul>
-            )}
-            {image && <img src={image} alt="Receipt" style={{maxWidth: '500px'}}/>}
         </div>
     );
 };

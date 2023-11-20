@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <BrowserRouter>
+        <div id="modal-root"></div>
         <Routes>
             <Route path="/" element={<Landing/>}></Route>
             <Route exact path={"/Dashboard"} element={<Dashboard/>}></Route>

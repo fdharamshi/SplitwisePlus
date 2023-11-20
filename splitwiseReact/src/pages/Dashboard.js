@@ -7,6 +7,7 @@ import {getAllCategories, getAllExpenses, getAllFriends, getAllGroups} from "../
 import ApC from "../ApexCharts/ApC";
 import SelfExpense from "../Components/SelfExpense";
 import {GroupBalances} from "../Components/Groups";
+import AddExpenseModal from "../Components/AddExpenseModal/AddExpenseModal";
 
 function Dashboard() {
 
@@ -23,6 +24,9 @@ function Dashboard() {
     const currentDate = new Date();
     const currentMonthYear = `${currentDate.toLocaleString('default', {month: 'long'})}-${currentDate.getFullYear()}`;
     const [selectedMonth, setSelectedMonth] = useState(currentMonthYear);
+
+    const [isModalOpen, setModalOpen] = useState(false);
+    const toggleModal = () => setModalOpen(!isModalOpen);
 
     // Function to generate month options for the dropdown
     const generateMonthOptions = () => {
@@ -73,8 +77,10 @@ function Dashboard() {
     return (
         <div className="App">
             <div>
-                <h1>Expenses
-                    {user !== null && <div>For {user?.user?.first_name}</div>}
+                <button className="openModalButton" onClick={toggleModal}>Add Expense</button>
+                <AddExpenseModal isOpen={isModalOpen} onClose={toggleModal} groups={allGroups}/>
+                <h1>
+                    {user !== null && <div>Expenses For {user?.user?.first_name}</div>}
                 </h1>
             </div>
 

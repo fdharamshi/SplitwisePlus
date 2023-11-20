@@ -53,3 +53,37 @@
     background-color: #fff; /* Light background for options */
     color: #333; /* Dark text color for options */
 }
+
+/* Button.css */
+
+button {
+    padding: 10px 20px;
+    margin: 10px;
+    background-color: #2a9d8f; /* Replace with your project's primary color */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    outline: none;
+}
+
+button:hover,
+button:focus {
+    background-color: #21867a; /* A slightly darker shade for hover effect */
+}
+
+button:active {
+    background-color: #1a6e63; /* An even darker shade for the active state */
+}
+
+/* Add media query for responsive design if necessary */
+@media (max-width: 768px) {
+    button {
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+}
