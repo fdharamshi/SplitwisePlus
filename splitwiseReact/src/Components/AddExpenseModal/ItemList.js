@@ -174,7 +174,7 @@ const ItemList = ({groupMembers, saveExpense}) => {
 
     return (
         <div>
-            <button onClick={formatRequest}>Save Expense</button>
+            <button className="saveExpense" onClick={formatRequest}>Save Expense</button>
             <Itemization callback={updateItemsFromReceipt}/>
             <button onClick={handleAddItem}>+ Add An Item</button>
             Total: ${getTotals()}

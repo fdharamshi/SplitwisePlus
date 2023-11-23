@@ -49,7 +49,7 @@ const ModalChildren = (props) => {
 
     return (
         <>
-            <div>
+            <div className="dropdown-container">
                 Select A Group:&nbsp;
                 <select value={selectedGroupId} onChange={handleSelectionChange}>
                     {sortedGroups.map((group) => (
