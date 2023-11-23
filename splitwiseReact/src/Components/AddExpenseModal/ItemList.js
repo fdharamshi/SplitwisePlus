@@ -31,7 +31,7 @@ const ItemList = ({groupMembers, saveExpense}) => {
         formattedRequest['cost'] = totalBillWithTipTax;
 
         // Construct the notes section
-        let notes = "SplitwisePro by Femin Dharamshi\n\n";
+        let notes = "SplitwisePro by Femin Dharamshi\nLearn More at https://github.com/fdharamshi/SplitwisePlus\n\n";
         notes += `Total Cost: ${Number(totalBillWithTipTax).toFixed(2)}\n`;
         notes += `Total Tip: ${tip.toFixed(2)}\n`;
         notes += `Total Tax: ${tax.toFixed(2)}\n\n`;
