@@ -6,6 +6,7 @@ import Tesseract from 'tesseract.js';
 const Itemization = (props) => {
     const [image, setImage] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [ocrProgress, setOcrProgress] = useState(0);
     const [items, setItems] = useState([]);
 
     const handleChange = (event) => {
@@ -20,11 +21,16 @@ const Itemization = (props) => {
             image,
             'eng',
             {
-                logger: m => console.log(m)
+                logger: m => {
+                    if (m.status === 'recognizing text') {
+                        setOcrProgress(m.progress);
+                    }
+                    console.log(m);
+                }
             }
         ).then(({data: {text}}) => {
             setIsProcessing(false);
-            // console.log(text);
+            setOcrProgress(0); // Reset progress
             // Here you need to implement the logic to parse the text and extract items and prices
             // This is a placeholder for demonstration
             const receiptItems = parseReceipt(text);
@@ -75,6 +81,23 @@ const Itemization = (props) => {
             <button onClick={handleUpload} disabled={isProcessing}>
                 {isProcessing ? 'Processing...' : 'Upload and Process Receipt'}
             </button>
+            {isProcessing && (
+                <div style={{
+                    width: '100%',
+                    backgroundColor: '#ddd',
+                    borderRadius: '4px',
+                    margin: '10px 0',
+                    overflow: 'hidden' // To maintain the border-radius effect
+                }}>
+                    <div style={{
+                        height: '20px',
+                        backgroundColor: '#2a9d8f',
+                        width: `${ocrProgress * 100}%`,
+                        transition: 'width 0.3s ease'
+                    }}>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

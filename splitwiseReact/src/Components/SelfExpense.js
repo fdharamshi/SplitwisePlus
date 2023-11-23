@@ -90,8 +90,8 @@ export const SelfExpense = (props) => {
         addExpenseAmount.current.value = null;
         addExpenseName.current.value = null;
         setSelectedCategory('');
-        console.log(selfGroup['id']);
-        console.log(added);
+        // console.log(selfGroup['id']);
+        // console.log(added);
         findTodaysExpense();
     }
 

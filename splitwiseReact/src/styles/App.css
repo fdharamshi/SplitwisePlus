@@ -56,7 +56,7 @@
 
 /* Button.css */
 
-button {
+button, input[type="file"] {
     padding: 10px 20px;
     margin: 10px;
     background-color: #2a9d8f; /* Replace with your project's primary color */

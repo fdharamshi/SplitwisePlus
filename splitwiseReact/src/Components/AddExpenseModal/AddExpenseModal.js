@@ -23,6 +23,8 @@ const AddExpenseModal = ({isOpen, onClose, groups}) => {
 const ModalChildren = (props) => {
 
     const [selectedGroupId, setSelectedGroupId] = useState(props.groups[0]?.id || '');
+    const selectedGroup = props.groups.find(group => group.id == selectedGroupId);
+    const groupMembers = selectedGroup ? selectedGroup.members : [];
 
     const sortedGroups = props.groups.sort((a, b) => {
         const dateA = new Date(a.updated_at);
@@ -47,7 +49,7 @@ const ModalChildren = (props) => {
                     ))}
                 </select>
             </div>
-            <ItemList/>
+            <ItemList groupMembers={groupMembers}/>
         </>
     );
 }

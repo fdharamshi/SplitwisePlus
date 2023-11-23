@@ -24,7 +24,7 @@ export default function process_data(data) {
     });
     // console.log(categories);
     // console.log("### ### ###")
-    console.log(expenses);
+    // console.log(expenses);
 
     return expenses;
 }
