@@ -2,10 +2,99 @@ import React, {useEffect, useState} from 'react';
 import Itemization from "../../pages/Itemization";
 import './ItemList.css';
 
-const ItemList = ({groupMembers}) => {
+const ItemList = ({groupMembers, saveExpense}) => {
     const [items, setItems] = useState([]);
     const [tip, setTip] = useState(0.0);
     const [tax, setTax] = useState(0.0);
+
+    const formatRequest = () => {
+        const memberCosts = calculateMemberCost();
+        const formattedRequest = {};
+        let totalBillWithTipTax = 0.0;
+        formattedRequest['cost'] = totalBillWithTipTax;
+
+        groupMembers.forEach((member, index) => {
+            const memberCost = memberCosts.get(member.id);
+            const owedShare = memberCost ? memberCost.totalCost + memberCost.tipShare + memberCost.taxShare : 0;
+
+            formattedRequest[`users__${index}__user_id`] = member.id;
+            formattedRequest[`users__${index}__first_name`] = member.first_name;
+            formattedRequest[`users__${index}__last_name`] = member.last_name || '';
+            formattedRequest[`users__${index}__email`] = member.email;
+            formattedRequest[`users__${index}__owed_share`] = owedShare.toFixed(2);
+            totalBillWithTipTax = (Number(totalBillWithTipTax) + Number(owedShare)).toFixed(2);
+
+            formattedRequest[`users__${index}__paid_share`] = "0";
+        });
+
+        formattedRequest['users__0__paid_share'] = Number(totalBillWithTipTax).toFixed(2);
+        formattedRequest['cost'] = totalBillWithTipTax;
+
+        // Construct the notes section
+        let notes = "SplitwisePro by Femin Dharamshi\n\n";
+        notes += `Total Cost: ${Number(totalBillWithTipTax).toFixed(2)}\n`;
+        notes += `Total Tip: ${tip.toFixed(2)}\n`;
+        notes += `Total Tax: ${tax.toFixed(2)}\n\n`;
+
+        notes += "Items:\n";
+        items.forEach(item => {
+            const includedMembers = item.members
+                .filter(member => member.included)
+                .map(member => member.name)
+                .join("\n   ");
+            const includedMembersCount = item.members.filter(member => member.included).length;
+            notes += `- ${item.name}: $${item.price} [Per Person: ${(Number(item.price) / includedMembersCount).toFixed(2)}]\n   ${includedMembers}\n`;
+        });
+
+        notes += "\nMember Costs:\n";
+        memberCosts.forEach((value, key) => {
+            notes += `- ${value.name}:\n   Total Cost $${value.totalCost.toFixed(2)}\n   Tip $${value.tipShare.toFixed(2)}\n   Tax $${value.taxShare.toFixed(2)}\n\n`;
+        });
+
+        formattedRequest['details'] = notes;
+
+        saveExpense(formattedRequest);
+    };
+
+    const calculateMemberCost = () => {
+        // Initialize a map to hold the total cost for each member
+        const memberCosts = new Map(groupMembers.map(member => [member.id, {
+            name: `${member.first_name} ${member.last_name ? member.last_name : ''}`,
+            totalCost: 0,
+            tipShare: 0,
+            taxShare: 0
+        }]));
+
+        let totalCostWithoutTipTax = 0;
+
+        items.forEach(item => {
+            const includedMembersCount = item.members.filter(member => member.included).length;
+            if (includedMembersCount === 0) return;
+
+            const eachMemberShare = parseFloat(item.price) / includedMembersCount;
+            totalCostWithoutTipTax += parseFloat(item.price);
+
+            item.members.forEach(member => {
+                if (member.included) {
+                    const memberCost = memberCosts.get(member.id);
+                    memberCost.totalCost += eachMemberShare;
+                    memberCosts.set(member.id, memberCost);
+                }
+            });
+        });
+
+        // Calculate and distribute tip and tax for each member
+        memberCosts.forEach((value, key) => {
+            if (value.totalCost > 0) {
+                const memberProportion = value.totalCost / totalCostWithoutTipTax;
+                value.tipShare = memberProportion * tip;
+                value.taxShare = memberProportion * tax;
+            }
+        });
+
+        // Convert the map back to an array of member costs
+        return memberCosts;
+    };
 
     useEffect(() => {
         // Function to initialize members for each item
@@ -85,6 +174,7 @@ const ItemList = ({groupMembers}) => {
 
     return (
         <div>
+            <button onClick={formatRequest}>Save Expense</button>
             <Itemization callback={updateItemsFromReceipt}/>
             <button onClick={handleAddItem}>+ Add An Item</button>
             Total: ${getTotals()}

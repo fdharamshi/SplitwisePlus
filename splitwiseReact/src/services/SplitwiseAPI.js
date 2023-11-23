@@ -81,6 +81,12 @@ export const createSelfExpense = async (API_KEY, description, amount, category_i
     return expense;
 }
 
+export const createGroupExpense = async (API_KEY, payload) => {
+    let expense = await postRequest(API_KEY, "https://secure.splitwise.com/api/v3.0/create_expense", payload);
+
+    return expense;
+}
+
 // export const getGroupExpenses = async (API_KEY, group_id) => {
 //     let expenses = await getRequest(API_KEY,)
 // }

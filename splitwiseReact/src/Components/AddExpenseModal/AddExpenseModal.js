@@ -1,7 +1,8 @@
 import React, {useState} from 'react';
 import ReactDOM from 'react-dom';
 import './AddExpenseModal.css';
-import ItemList from "./ItemList"; // Import the CSS file for styling
+import ItemList from "./ItemList";
+import {createGroupExpense} from "../../services/SplitwiseAPI"; // Import the CSS file for styling
 
 const AddExpenseModal = ({isOpen, onClose, groups}) => {
     if (!isOpen) return null;
@@ -37,6 +38,15 @@ const ModalChildren = (props) => {
         setSelectedGroupId(event.target.value);
     };
 
+    const saveExpense = async (formattedRequest) => {
+        formattedRequest['description'] = "SplitwisePro By Femin";
+        formattedRequest['currency_code'] = "USD";
+        formattedRequest['group_id'] = selectedGroup.id;
+
+        let added = await createGroupExpense(window.localStorage.getItem("API_KEY"), formattedRequest);
+        console.log(added);
+    }
+
     return (
         <>
             <div>
@@ -49,7 +59,7 @@ const ModalChildren = (props) => {
                     ))}
                 </select>
             </div>
-            <ItemList groupMembers={groupMembers}/>
+            <ItemList groupMembers={groupMembers} saveExpense={saveExpense}/>
         </>
     );
 }
