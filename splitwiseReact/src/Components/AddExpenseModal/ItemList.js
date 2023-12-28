@@ -7,11 +7,26 @@ const ItemList = ({groupMembers, saveExpense}) => {
     const [tip, setTip] = useState(0.0);
     const [tax, setTax] = useState(0.0);
 
+    // TODO: Default payer == Self.
+    const [selectedPayer, setSelectedPayer] = useState('');
+
+    const handlePayerChange = (event) => {
+        setSelectedPayer(event.target.value);
+    };
+
+    const [description, setDescription] = useState('');
+
+    const handleDescriptionChange = (event) => {
+        setDescription(event.target.value);
+    };
+
     const formatRequest = () => {
         const memberCosts = calculateMemberCost();
         const formattedRequest = {};
         let totalBillWithTipTax = 0.0;
         formattedRequest['cost'] = totalBillWithTipTax;
+
+        let payerIndex = -1;
 
         groupMembers.forEach((member, index) => {
             const memberCost = memberCosts.get(member.id);
@@ -25,13 +40,17 @@ const ItemList = ({groupMembers, saveExpense}) => {
             totalBillWithTipTax = (Number(totalBillWithTipTax) + Number(owedShare)).toFixed(2);
 
             formattedRequest[`users__${index}__paid_share`] = "0";
+            if (member.id == selectedPayer) {
+                payerIndex = index;
+            }
         });
 
-        formattedRequest['users__0__paid_share'] = Number(totalBillWithTipTax).toFixed(2);
+        formattedRequest[`users__${payerIndex}__paid_share`] = Number(totalBillWithTipTax).toFixed(2);
         formattedRequest['cost'] = totalBillWithTipTax;
+        formattedRequest['description'] = description;
 
         // Construct the notes section
-        let notes = "SplitwisePro by Femin Dharamshi\nLearn More at https://github.com/fdharamshi/SplitwisePlus\n\n";
+        let notes = "SplitwisePlus by Femin Dharamshi\nLearn More at https://github.com/fdharamshi/SplitwisePlus\n\n";
         notes += `Total Cost: ${Number(totalBillWithTipTax).toFixed(2)}\n`;
         notes += `Total Tip: ${tip.toFixed(2)}\n`;
         notes += `Total Tax: ${tax.toFixed(2)}\n\n`;
@@ -52,7 +71,6 @@ const ItemList = ({groupMembers, saveExpense}) => {
         });
 
         formattedRequest['details'] = notes;
-
         saveExpense(formattedRequest);
     };
 
@@ -106,6 +124,7 @@ const ItemList = ({groupMembers, saveExpense}) => {
         }));
 
         setItems(updatedItems);
+        setSelectedPayer('');
     }, [groupMembers]);
 
     const handleAddItem = () => {
@@ -127,6 +146,15 @@ const ItemList = ({groupMembers, saveExpense}) => {
             name: `${member.first_name} ${member.last_name ? member.last_name : ''}`
         }));
     };
+
+    const toggleAllMembers = (itemIndex) => {
+        const newItems = [...items];
+        const allSelected = newItems[itemIndex].members.every(member => member.included);
+        newItems[itemIndex].members.forEach(member => {
+            member.included = !allSelected;
+        });
+        setItems(newItems);
+    }
 
     const toggleMember = (itemIndex, memberId) => {
         const newItems = [...items];
@@ -197,6 +225,27 @@ const ItemList = ({groupMembers, saveExpense}) => {
                         onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
                     />
                 </div>
+                <div className="payer-dropdown-container">
+                    <label htmlFor="payer-select">Select Payer:</label>
+                    <select id="payer-select" value={selectedPayer} onChange={handlePayerChange}>
+                        <option value="">Select a member</option>
+                        {groupMembers.map((member) => (
+                            <option key={member.id} value={member.id}>
+                                {member.first_name} {member.last_name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className="input-group">
+                    <label htmlFor="title-input">Enter Expense Title</label>
+                    <input
+                        id="title-input"
+                        type="text"
+                        placeholder="Expense Title"
+                        value={description}
+                        onChange={handleDescriptionChange}
+                    />
+                </div>
             </div>
             {items.map((item, index) => (
                 <div key={index}>
@@ -221,6 +270,15 @@ const ItemList = ({groupMembers, saveExpense}) => {
                         <button onClick={() => handleRemoveItem(index)}>Remove</button>
                     </div>
                     <div className="members-container">
+                        <label className="custom-checkbox">
+                            <input
+                                type="checkbox"
+                                checked={item.members.every(member => member.included)}
+                                onChange={() => toggleAllMembers(index)}
+                            />
+                            <span className="checkbox-label"></span> {/* For custom checkbox design */}
+                        </label>
+                        Toggle All&nbsp;
                         {item.members.map(member => (
                             <div key={member.id} className="member-checkbox">
                                 <label className="custom-checkbox">

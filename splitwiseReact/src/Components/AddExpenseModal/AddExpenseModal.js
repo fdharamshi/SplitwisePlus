@@ -2,9 +2,10 @@ import React, {useState} from 'react';
 import ReactDOM from 'react-dom';
 import './AddExpenseModal.css';
 import ItemList from "./ItemList";
-import {createGroupExpense} from "../../services/SplitwiseAPI"; // Import the CSS file for styling
+import {createGroupExpense} from "../../services/SplitwiseAPI";
+import Select from 'react-select' // Import the CSS file for styling
 
-const AddExpenseModal = ({isOpen, onClose, groups}) => {
+const AddExpenseModal = ({isOpen, onClose, groups, allFriends}) => {
     if (!isOpen) return null;
 
     return ReactDOM.createPortal(
@@ -14,7 +15,8 @@ const AddExpenseModal = ({isOpen, onClose, groups}) => {
                 <button className="modal-close" onClick={onClose}>
                     &times;
                 </button>
-                <div className="modal-content"><ModalChildren groups={groups}/></div>
+                <div className="modal-content"><ModalChildren groups={groups} onClose={onClose}
+                                                              allFriends={allFriends}/></div>
             </div>
         </>,
         document.getElementById('modal-root') // This is where the modal will be mounted in the HTML
@@ -25,6 +27,7 @@ const ModalChildren = (props) => {
 
     const [selectedGroupId, setSelectedGroupId] = useState(props.groups[0]?.id || '');
     const selectedGroup = props.groups.find(group => group.id == selectedGroupId);
+    const [selectedFriends, setSelectedFriends] = useState([]);
     const groupMembers = selectedGroup ? selectedGroup.members : [];
 
     const sortedGroups = props.groups.sort((a, b) => {
@@ -39,12 +42,13 @@ const ModalChildren = (props) => {
     };
 
     const saveExpense = async (formattedRequest) => {
-        formattedRequest['description'] = "SplitwisePro By Femin";
+        formattedRequest['description'] = formattedRequest['description'] + " - SplitwisePlus By Femin";
         formattedRequest['currency_code'] = "USD";
         formattedRequest['group_id'] = selectedGroup.id;
 
         let added = await createGroupExpense(window.localStorage.getItem("API_KEY"), formattedRequest);
         console.log(added);
+        props.onClose();
     }
 
     return (
@@ -59,7 +63,20 @@ const ModalChildren = (props) => {
                     ))}
                 </select>
             </div>
-            <ItemList groupMembers={groupMembers} saveExpense={saveExpense}/>
+            {selectedGroupId == 0 && <Select options={props.allFriends.map(item => ({
+                value: item,
+                label: item.first_name
+            }))} isMulti={true} onChange={(selected) => {
+                selected = selected.map(s => s.value)
+                selected = [...selected, {
+                    email: "femin.dharamshi1999@gmail.com",
+                    first_name: "Femin",
+                    last_name: "Dharamshi",
+                    id: 15746973
+                }]
+                setSelectedFriends((selected));
+            }}/>}
+            <ItemList groupMembers={selectedGroupId == 0 ? selectedFriends : groupMembers} saveExpense={saveExpense}/>
         </>
     );
 }

@@ -33,7 +33,9 @@ const Itemization = (props) => {
             setOcrProgress(0); // Reset progress
             // Here you need to implement the logic to parse the text and extract items and prices
             // This is a placeholder for demonstration
+            console.log(text);
             const receiptItems = parseReceipt(text);
+            console.log(receiptItems);
             setItems(receiptItems);
             props.callback(receiptItems);
         });
@@ -43,7 +45,8 @@ const Itemization = (props) => {
         const lines = text.split('\n');
 
         // A regex to match a line with an optional quantity at the start, followed by item description, and ending with a price.
-        const itemLineRegex = /^(\d+\s+)?(.+?)\s+(\d+[\.,]\d{2})$/;
+        // const itemLineRegex = /^(\d+\s+)?(.+?)\s+(\d+[\.,]\d{2})$/;
+        const itemLineRegex = /^(\d+\s+)?(.+?)\s+([S$]*\d+[\.,]\d{2})$/;
 
         // A regex to identify lines that likely don't contain items - such as headers, totals, etc.
         const nonItemLineRegex = /(subtotal|total|tax|tip|balance due|server|guests|date|time|change|cash|card|pay|cc|check|^\s*$)/i;
@@ -63,7 +66,7 @@ const Itemization = (props) => {
                 // If a quantity is found, use it; otherwise, default to 1
                 const quantity = match[1] ? parseInt(match[1].trim(), 10) : 1;
                 const name = match[2].trim();
-                const price = match[3].replace(',', '.'); // Replace comma with dot for standardization
+                const price = match[3].replace(',', '.').replace('$', ''); // Replace comma with dot for standardization
 
                 // Check for a valid item name and price format
                 if (name && price && !isNaN(parseFloat(price))) {

@@ -8,9 +8,12 @@ axios.defaults.headers = {
     'Accept': 'application/json',
 };
 
+// const BASE_URL = "https://018d-100-35-197-153.ngrok-free.app";
+const BASE_URL = "http://127.0.0.1:8000";
+
 export const getRequest = async (API_KEY, url) => {
     let response = await axios
-        .post("http://127.0.0.1:8000/forward-get", {
+        .post(`${BASE_URL}/forward-get`, {
             "url": url,
             "API_KEY": API_KEY
         });
@@ -20,7 +23,7 @@ export const getRequest = async (API_KEY, url) => {
 
 export const postRequest = async (API_KEY, url, data) => {
     let response = await axios
-        .post("http://127.0.0.1:8000/forward-post", {
+        .post(`${BASE_URL}/forward-post`, {
             "url": url,
             "API_KEY": API_KEY,
             "postData": data

@@ -78,7 +78,7 @@ function Dashboard() {
         <div className="App">
             <div>
                 <button className="openModalButton" onClick={toggleModal}>Add Expense</button>
-                <AddExpenseModal isOpen={isModalOpen} onClose={toggleModal} groups={allGroups}/>
+                <AddExpenseModal isOpen={isModalOpen} onClose={toggleModal} groups={allGroups} allFriends={allFriends}/>
                 <h1>
                     {user !== null && <div>Expenses For {user?.user?.first_name}</div>}
                 </h1>
