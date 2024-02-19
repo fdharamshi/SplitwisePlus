@@ -1,4 +1,4 @@
-import '../styles/App.css';
+import './Landing.css';
 import React, {useEffect, useRef, useState} from 'react';
 import {useNavigate} from "react-router-dom";
 import {getUser} from "../services/SplitwiseAPI";
@@ -35,16 +35,22 @@ function Landing() {
 
     return (
         <div className="App">
-            <div>
-                <h1>Expenses</h1>
-                <h2>Hello {user.user !== undefined ? user.user.first_name : "Invalid API_KEY"}</h2>
-                <input type="text" placeholder="Enter API KEY" ref={API_KEY_Input}/>
-                <button onClick={() => {
-                    handleFetchExpenses(API_KEY_Input.current.value)
-                }}>
-                    Fetch Expenses
-                </button>
-            </div>
+            <header className="App-header">
+                <h1>Welcome to Splitwise Plus</h1>
+                <p>By Femin Dharamshi</p>
+                <div>
+                    <input type="text" placeholder="Enter Splitwise API key" ref={API_KEY_Input}
+                           className="api-key-input"/>
+                    <button onClick={() => {
+                        handleFetchExpenses(API_KEY_Input.current.value)
+                    }}
+                            className="continue-button">
+                        Continue
+                    </button>
+                    <a href="https://secure.splitwise.com/apps" className="api-key-link">Click here to get an API
+                        key</a>
+                </div>
+            </header>
         </div>
     );
 }

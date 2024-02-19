@@ -2,6 +2,12 @@ import React, {useEffect, useState} from 'react';
 import Itemization from "../../pages/Itemization";
 import './ItemList.css';
 
+const Decimal = require('decimal.js');
+
+Decimal.config({
+    decimalPlaces: 2
+});
+
 const ItemList = ({groupMembers, saveExpense}) => {
     const [items, setItems] = useState([]);
     const [tip, setTip] = useState(0.0);
@@ -20,24 +26,30 @@ const ItemList = ({groupMembers, saveExpense}) => {
         setDescription(event.target.value);
     };
 
-    const formatRequest = () => {
+    function formatRequest() {
         const memberCosts = calculateMemberCost();
         const formattedRequest = {};
-        let totalBillWithTipTax = 0.0;
-        formattedRequest['cost'] = totalBillWithTipTax;
+        let totalOwedShares = new Decimal(0);
 
         let payerIndex = -1;
 
+        let totalBillWithTipTax = (new Decimal(0)).plus(new Decimal(tax)).plus(new Decimal(tip));
+        items.forEach(item => {
+            totalBillWithTipTax = totalBillWithTipTax.plus(new Decimal(item.price));
+        });
+
         groupMembers.forEach((member, index) => {
             const memberCost = memberCosts.get(member.id);
-            const owedShare = memberCost ? memberCost.totalCost + memberCost.tipShare + memberCost.taxShare : 0;
+            // Ensure owedShare is rounded to 2 decimal places for consistency
+            const owedShareRounded = new Decimal(memberCost.owedShare).toFixed(2);
 
+            // Construct the part of the request concerning this member
             formattedRequest[`users__${index}__user_id`] = member.id;
             formattedRequest[`users__${index}__first_name`] = member.first_name;
             formattedRequest[`users__${index}__last_name`] = member.last_name || '';
             formattedRequest[`users__${index}__email`] = member.email;
-            formattedRequest[`users__${index}__owed_share`] = owedShare.toFixed(2);
-            totalBillWithTipTax = (Number(totalBillWithTipTax) + Number(owedShare)).toFixed(2);
+            formattedRequest[`users__${index}__owed_share`] = owedShareRounded; // Use the rounded owedShare
+            totalOwedShares = totalOwedShares.plus(new Decimal(owedShareRounded));
 
             formattedRequest[`users__${index}__paid_share`] = "0";
             if (member.id == selectedPayer) {
@@ -45,9 +57,21 @@ const ItemList = ({groupMembers, saveExpense}) => {
             }
         });
 
-        formattedRequest[`users__${payerIndex}__paid_share`] = Number(totalBillWithTipTax).toFixed(2);
-        formattedRequest['cost'] = totalBillWithTipTax;
+        // Adjust for any discrepancy due to rounding in owed shares vs. total bill
+        const totalBillDecimal = new Decimal(totalBillWithTipTax).toFixed(2);
+        let discrepancy = new Decimal(totalBillDecimal).minus(totalOwedShares).toFixed(2);
+
+        if (discrepancy !== "0.00") {
+            // Identify the first member to adjust (could be based on other criteria)
+            const firstMemberCost = memberCosts.get(groupMembers[0].id);
+            const adjustedOwedShare = new Decimal(firstMemberCost.owedShare).plus(new Decimal(discrepancy)).toFixed(2);
+            formattedRequest[`users__0__owed_share`] = adjustedOwedShare; // Adjust the first member's owed share
+        }
+
+        // Set the total cost and description in the request
+        formattedRequest['cost'] = totalBillDecimal;
         formattedRequest['description'] = description;
+        formattedRequest[`users__${payerIndex}__paid_share`] = totalBillDecimal;
 
         // Construct the notes section
         let notes = "SplitwisePlus by Femin Dharamshi\nLearn More at https://github.com/fdharamshi/SplitwisePlus\n\n";
@@ -74,45 +98,66 @@ const ItemList = ({groupMembers, saveExpense}) => {
         saveExpense(formattedRequest);
     };
 
-    const calculateMemberCost = () => {
-        // Initialize a map to hold the total cost for each member
-        const memberCosts = new Map(groupMembers.map(member => [member.id, {
-            name: `${member.first_name} ${member.last_name ? member.last_name : ''}`,
-            totalCost: 0,
-            tipShare: 0,
-            taxShare: 0
-        }]));
+    function calculateMemberCost() {
+        const memberCosts = new Map();
+        let totalItemsCost = new Decimal(0);
 
-        let totalCostWithoutTipTax = 0;
+        // Initialize memberCosts
+        groupMembers.forEach(member => {
+            memberCosts.set(member.id, {
+                name: `${member.first_name} ${member.last_name ? member.last_name : ''}`,
+                totalCost: new Decimal(0),
+                tipShare: new Decimal(0),
+                taxShare: new Decimal(0),
+                owedShare: new Decimal(0)
+            });
+        });
 
+        // Calculate total cost of items
         items.forEach(item => {
-            const includedMembersCount = item.members.filter(member => member.included).length;
-            if (includedMembersCount === 0) return;
+            totalItemsCost = totalItemsCost.plus(new Decimal(item.price));
+        });
 
-            const eachMemberShare = parseFloat(item.price) / includedMembersCount;
-            totalCostWithoutTipTax += parseFloat(item.price);
+        // Calculate each item's share of tax and tip
+        items.forEach(item => {
+            const itemCost = new Decimal(item.price);
+            const itemProportion = itemCost.dividedBy(totalItemsCost);
+            const itemTax = new Decimal(tax).times(itemProportion);
+            const itemTip = new Decimal(tip).times(itemProportion);
+            const itemTotalCost = itemCost.plus(itemTax).plus(itemTip);
 
+            // Calculate and update each included member's cost
             item.members.forEach(member => {
                 if (member.included) {
                     const memberCost = memberCosts.get(member.id);
-                    memberCost.totalCost += eachMemberShare;
+                    const memberShare = itemTotalCost.dividedBy(item.members.filter(m => m.included).length);
+                    memberCost.totalCost = memberCost.totalCost.plus(memberShare);
+                    memberCost.tipShare = memberCost.tipShare.plus(itemTip.dividedBy(item.members.filter(m => m.included).length));
+                    memberCost.taxShare = memberCost.taxShare.plus(itemTax.dividedBy(item.members.filter(m => m.included).length));
+                    memberCost.owedShare = memberCost.owedShare.plus(memberShare);
                     memberCosts.set(member.id, memberCost);
                 }
             });
         });
 
-        // Calculate and distribute tip and tax for each member
+        // Calculate discrepancy and adjust the first included member's share
+        let totalOwedShare = new Decimal(0);
         memberCosts.forEach((value, key) => {
-            if (value.totalCost > 0) {
-                const memberProportion = value.totalCost / totalCostWithoutTipTax;
-                value.tipShare = memberProportion * tip;
-                value.taxShare = memberProportion * tax;
-            }
+            totalOwedShare = totalOwedShare.plus(value.owedShare);
         });
 
-        // Convert the map back to an array of member costs
+        const totalBill = totalItemsCost.plus(new Decimal(tax)).plus(new Decimal(tip));
+        const discrepancy = totalBill.minus(totalOwedShare);
+
+        if (!discrepancy.isZero()) {
+            const firstMemberId = groupMembers[0].id; // Assuming the first member in the list is the one to adjust
+            const firstMemberCost = memberCosts.get(firstMemberId);
+            firstMemberCost.owedShare = firstMemberCost.owedShare.plus(discrepancy);
+            memberCosts.set(firstMemberId, firstMemberCost);
+        }
+
         return memberCosts;
-    };
+    }
 
     useEffect(() => {
         // Function to initialize members for each item

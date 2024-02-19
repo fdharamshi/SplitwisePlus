@@ -51,6 +51,9 @@ const ModalChildren = (props) => {
         props.onClose();
     }
 
+    const localUser = JSON.parse(window.localStorage.getItem("user"));
+    console.log(localUser);
+
     return (
         <>
             <div className="dropdown-container">
@@ -63,16 +66,17 @@ const ModalChildren = (props) => {
                     ))}
                 </select>
             </div>
+
             {selectedGroupId == 0 && <Select options={props.allFriends.map(item => ({
                 value: item,
                 label: item.first_name
             }))} isMulti={true} onChange={(selected) => {
                 selected = selected.map(s => s.value)
                 selected = [...selected, {
-                    email: "femin.dharamshi1999@gmail.com",
-                    first_name: "Femin",
-                    last_name: "Dharamshi",
-                    id: 15746973
+                    email: localUser['user']['email'],
+                    first_name: localUser['user']['first_name'],
+                    last_name: localUser['user']['last_name'],
+                    id: localUser['user']['id']
                 }]
                 setSelectedFriends((selected));
             }}/>}

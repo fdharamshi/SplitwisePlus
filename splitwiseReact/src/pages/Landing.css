@@ -1,0 +1,89 @@
+.App {
+    text-align: center;
+    background-color: black; /* Sets the background color of the entire page to black */
+    height: 100vh; /* Makes sure the app fills the whole viewport */
+    color: white; /* Sets the text color to white for all text inside .App */
+    font-family: Arial, sans-serif; /* Sets a default font for all text */
+}
+
+.App-header {
+    position: relative; /* This is necessary for absolute positioning of children */
+    color: white;
+    /* You may need to set a specific height if the content doesn't fill the space */
+    z-index: 0;
+}
+
+.App-header::before {
+    content: ' ';
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.5;
+    background-color: black;
+    background-image: url('./dollar.jpg');
+    background-repeat: no-repeat;
+    background-position: 50% 0;
+    background-size: cover;
+    z-index: -1;
+}
+
+.api-key-input {
+    margin: 20px 0;
+    padding: 10px;
+    width: 300px; /* Sets a fixed width to the input */
+    border: none;
+    border-radius: 5px; /* Gives the input rounded corners */
+}
+
+.continue-button {
+    width: 150px; /* Sets a fixed width to the button */
+    padding: 10px;
+    background-color: #28a745; /* A green background for the button */
+    color: white;
+    border: none;
+    border-radius: 5px; /* Gives the button rounded corners */
+    cursor: pointer; /* Changes the mouse cursor on hover */
+    margin-bottom: 20px; /* Adds space below the button */
+}
+
+.continue-button:hover {
+    background-color: #218838; /* A slightly darker green for the button on hover */
+}
+
+.api-key-link {
+    color: #00BFFF; /* A blue color for the link */
+    text-decoration: none; /* Removes underline from the link */
+    display: block; /* Makes the link take up the full width of its container */
+    margin-bottom: 20px; /* Adds space below the link */
+    font-size: 0.75em;
+}
+
+.api-key-link:hover {
+    text-decoration: underline; /* Adds underline on hover for the link */
+}
+
+/* You might need to adjust the following h1 and p styles to match the exact font sizes and weights from the design */
+h1 {
+    font-size: 1.5em; /* Sets a larger font size for the main heading */
+    font-weight: bold; /* Makes the main heading text bold */
+    color: white;
+    margin: 0;
+    padding: 0;
+}
+
+p {
+    margin: 0;
+    padding: 0;
+    font-size: 0.75em; /* Sets the font size for the subheading */
+}
+
+/* Add additional media queries as necessary to ensure responsiveness */
+@media (max-width: 768px) {
+    .api-key-input,
+    .continue-button {
+        width: 80%; /* Makes input and button fill 80% of the screen width on smaller screens */
+    }
+}

@@ -32,6 +32,15 @@ export const postRequest = async (API_KEY, url, data) => {
     return response.data;
 }
 
+export const sendEmail = async (data) => {
+    let response = await axios
+        .post(`${BASE_URL}/send-email`, {
+            "postData": data
+        });
+
+    return response.data;
+}
+
 export const getUser = async (API_KEY) => {
     let user = await getRequest(API_KEY, "https://secure.splitwise.com/api/v3.0/get_current_user");
     return user;

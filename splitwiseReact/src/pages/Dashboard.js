@@ -3,9 +3,8 @@ import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import process_data from "../services/data_processor";
-import {getAllCategories, getAllExpenses, getAllFriends, getAllGroups} from "../services/SplitwiseAPI";
+import {getAllCategories, getAllExpenses, getAllFriends, getAllGroups, sendEmail} from "../services/SplitwiseAPI";
 import ApC from "../ApexCharts/ApC";
-import SelfExpense from "../Components/SelfExpense";
 import {GroupBalances} from "../Components/Groups";
 import AddExpenseModal from "../Components/AddExpenseModal/AddExpenseModal";
 
@@ -27,6 +26,31 @@ function Dashboard() {
 
     const [isModalOpen, setModalOpen] = useState(false);
     const toggleModal = () => setModalOpen(!isModalOpen);
+
+    const sendReminders = () => {
+        let filteredFriends = allFriends.filter(friend => {
+            // Check if 'balance' key exists and it is an array with length > 0
+            if (friend.balance && Array.isArray(friend.balance) && friend.balance.length > 0) {
+                // Check if the first object in the 'balance' array has an 'amount' key greater than 0.0
+                return friend.balance[0].amount > 0.0;
+            }
+            return false;
+        });
+        if (filteredFriends.length > 0) {
+            filteredFriends.forEach(friend => {
+                sendEmail({
+                    receiverEmail: friend.email,
+                    receiverName: friend.first_name,
+                    amount: friend.balance[0].amount
+                })
+                console.log(`sent to ${{
+                    receiverEmail: friend.email,
+                    receiverName: friend.first_name,
+                    amount: friend.balance[0].amount
+                }}`)
+            })
+        }
+    }
 
     // Function to generate month options for the dropdown
     const generateMonthOptions = () => {
@@ -78,6 +102,10 @@ function Dashboard() {
         <div className="App">
             <div>
                 <button className="openModalButton" onClick={toggleModal}>Add Expense</button>
+                {/*<button onClick={() => {*/}
+                {/*    sendReminders();*/}
+                {/*}}>Send Reminders*/}
+                {/*</button>*/}
                 <AddExpenseModal isOpen={isModalOpen} onClose={toggleModal} groups={allGroups} allFriends={allFriends}/>
                 <h1>
                     {user !== null && <div>Expenses For {user?.user?.first_name}</div>}
@@ -93,7 +121,7 @@ function Dashboard() {
             {fetched && `Total Expense: $${Object.values(expensesData[selectedMonth]).reduce((partialSum, a) => partialSum + a, 0).toFixed(2)}`}
 
             {fetched && ApC({data: expensesData[selectedMonth], month: selectedMonth})}
-            <SelfExpense categories={categories} groups={allGroups}/>
+            {/*<SelfExpense categories={categories} groups={allGroups}/>*/}
             <GroupBalances groupsData={allGroups}/>
         </div>
     );
