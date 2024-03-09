@@ -2,11 +2,26 @@ import './Landing.css';
 import React, {useEffect, useRef, useState} from 'react';
 import {useNavigate} from "react-router-dom";
 import {getUser} from "../services/SplitwiseAPI";
+import DisclaimerModal from "../Components/DisclaimerModal/DisclaimerModal";
 
 function Landing() {
 
     const [user, setUser] = useState({});
     const navigate = useNavigate();
+    const [showDisclaimerModal, setShowDisclaimerModal] = useState(false);
+
+    function openDisclaimerModal() {
+        setShowDisclaimerModal(true);
+    }
+
+    function closeDisclaimerModal() {
+        setShowDisclaimerModal(false);
+    }
+
+    const continueToSplitwise = () => {
+        closeDisclaimerModal();
+        window.location.href = 'https://secure.splitwise.com/apps';
+    }
 
     useEffect(() => {
         const localUser = window.localStorage.getItem("user");
@@ -47,10 +62,18 @@ function Landing() {
                             className="continue-button">
                         Continue
                     </button>
-                    <a href="https://secure.splitwise.com/apps" className="api-key-link">Click here to get an API
-                        key</a>
+
                 </div>
+                <button onClick={openDisclaimerModal} className="dislaimer-button">Click here to get an API key</button>
             </header>
+            {
+                showDisclaimerModal && (
+                    <DisclaimerModal
+                        onClose={closeDisclaimerModal}
+                        onContinue={continueToSplitwise}
+                    />
+                )
+            }
         </div>
     );
 }

@@ -46,7 +46,7 @@
     border: none;
     border-radius: 5px; /* Gives the button rounded corners */
     cursor: pointer; /* Changes the mouse cursor on hover */
-    margin-bottom: 20px; /* Adds space below the button */
+    margin-bottom: 10px; /* Adds space below the button */
 }
 
 .continue-button:hover {
@@ -54,15 +54,11 @@
 }
 
 .api-key-link {
-    color: #00BFFF; /* A blue color for the link */
+    color: white; /* A blue color for the link */
     text-decoration: none; /* Removes underline from the link */
     display: block; /* Makes the link take up the full width of its container */
     margin-bottom: 20px; /* Adds space below the link */
     font-size: 0.75em;
-}
-
-.api-key-link:hover {
-    text-decoration: underline; /* Adds underline on hover for the link */
 }
 
 /* You might need to adjust the following h1 and p styles to match the exact font sizes and weights from the design */

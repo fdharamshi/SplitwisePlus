@@ -1,0 +1,100 @@
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+}
+
+.modal-body img {
+    object-fit: contain;
+    width: 40%;
+    display: block;
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    max-height: 90%;
+    overflow-y: auto;
+    width: 50%; /* Adjust based on your design needs */
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    margin: 0;
+}
+
+.modal-header button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: none;
+    font-size: large;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        width: 90%;
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+
+    .modal-body {
+        margin-top: 25px;
+    }
+
+    .modal-header button {
+        padding: 5px 10px;
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        border: none;
+        font-size: large;
+        cursor: pointer;
+    }
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: center;
+    padding-top: 15px;
+}
+
+.modal-footer button {
+    padding: 10px 20px;
+    text-transform: initial;
+    background-color: #2a9d8f; /* Replace with your project's primary color */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    outline: none;
+    z-index: 1001;
+}
+
+.moddal-bo
+.modal-footer button:hover,
+button:focus {
+    background-color: #21867a; /* A slightly darker shade for hover effect */
+}
+
+.modal-footer button:active {
+    background-color: #1a6e63; /* An even darker shade for the active state */
+}

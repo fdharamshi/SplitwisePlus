@@ -26,6 +26,10 @@
     color: white;
 }
 
+.App-header .dislaimer-button {
+    text-transform: initial;
+}
+
 .App-link {
     color: #61dafb;
 }

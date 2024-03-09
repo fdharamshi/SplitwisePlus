@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import Itemization from "../../pages/Itemization";
 import './ItemList.css';
 
 const Decimal = require('decimal.js');
@@ -248,9 +247,9 @@ const ItemList = ({groupMembers, saveExpense}) => {
     return (
         <div>
             <button className="saveExpense" onClick={formatRequest}>Save Expense</button>
-            <Itemization callback={updateItemsFromReceipt}/>
-            <button onClick={handleAddItem}>+ Add An Item</button>
-            Total: ${getTotals()}
+            {/*<Itemization callback={updateItemsFromReceipt}/>*/}
+            <span
+                className="totals-span">Total: ${getTotals()}<br/>Total with Tip & Tax: ${getTotals() + tip + tax} </span>
             <div className="financial-inputs">
                 <div className="input-group">
                     <label htmlFor="tip-input">Enter Tip:</label>
@@ -292,26 +291,30 @@ const ItemList = ({groupMembers, saveExpense}) => {
                     />
                 </div>
             </div>
+            <button className="saveExpense" onClick={handleAddItem}>+ Add An Item</button>
             {items.map((item, index) => (
                 <div key={index}>
-                    <div className={`item-row ${item.quantity == 0 || item.price == 0 ? 'alert-row' : ''}`}
-                         key={index}>
+                    <div className={`item-row ${item.quantity == 0 || item.price == 0 ? 'alert-row' : ''}`}>
                         <button onClick={() => handleDuplicateItem(index)}>Duplicate</button>
-                        <input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) => updateItem(index, 'quantity', e.target.value)}
-                        />
-                        <input
-                            type="text"
-                            value={item.name}
-                            onChange={(e) => updateItem(index, 'name', e.target.value)}
-                        />
-                        <input
-                            type="number"
-                            value={item.price}
-                            onChange={(e) => updateItem(index, 'price', e.target.value)}
-                        />
+
+                        <div className="input-container">
+                            <label className="mobile-label">Item Name:</label>
+                            <input
+                                type="text"
+                                value={item.name}
+                                onChange={(e) => updateItem(index, 'name', e.target.value)}
+                            />
+                        </div>
+
+                        <div className="input-container">
+                            <label className="mobile-label">Item Price:</label>
+                            <input
+                                type="number"
+                                value={item.price}
+                                onChange={(e) => updateItem(index, 'price', e.target.value)}
+                            />
+                        </div>
+
                         <button onClick={() => handleRemoveItem(index)}>Remove</button>
                     </div>
                     <div className="members-container">
@@ -340,6 +343,7 @@ const ItemList = ({groupMembers, saveExpense}) => {
                     </div>
                 </div>
             ))}
+            {items.length > 0 && <button className="saveExpense" onClick={handleAddItem}>+ Add An Item</button>}
         </div>
     );
 };

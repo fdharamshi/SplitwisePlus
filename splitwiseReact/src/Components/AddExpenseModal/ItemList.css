@@ -16,13 +16,23 @@
     /* Other styling as needed */
 }
 
+.totals-span {
+    font-weight: bolder;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    font-size: 1em;
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+}
+
 .member-checkbox input[type="checkbox"] {
     margin-right: 5px;
 }
 
 .financial-inputs {
     display: flex;
-    justify-content: space-evenly;
+    flex-direction: column;
     padding: 10px 0;
 }
 
@@ -30,6 +40,7 @@
     display: flex;
     flex-direction: column;
     margin-right: 20px;
+    margin-top: 0.25em;
 }
 
 .input-group label {
@@ -47,18 +58,6 @@
 .input-group input:focus {
     border-color: #007bff;
     outline: none;
-}
-
-/* If needed, add responsive styles */
-@media (max-width: 768px) {
-    .financial-inputs {
-        flex-direction: column;
-    }
-
-    .input-group {
-        margin-right: 0;
-        margin-bottom: 10px;
-    }
 }
 
 /* Custom checkbox style */
@@ -95,6 +94,12 @@
     height: 100%;
 }
 
+.payer-dropdown-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .payer-dropdown-container select {
     padding: 10px 20px;
     background-color: #2a9d8f; /* Primary color */
@@ -107,8 +112,31 @@
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+    margin: 0.5em;
 }
 
 .payer-dropdown-container label {
     margin-right: 10px;
+}
+
+/* If needed, add responsive styles */
+@media (max-width: 768px) {
+    .financial-inputs {
+        flex-direction: column;
+    }
+
+    .input-group {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+
+    /*.item-row {*/
+    /*    display: flex;*/
+    /*    flex-direction: column;*/
+    /*}*/
+    /*.item-row input {*/
+    /*    width: 70%;*/
+    /*    display: flex;*/
+    /*    margin-top: 4px;*/
+    /*}*/
 }

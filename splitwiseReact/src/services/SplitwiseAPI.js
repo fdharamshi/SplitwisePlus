@@ -9,7 +9,8 @@ axios.defaults.headers = {
 };
 
 // const BASE_URL = "https://018d-100-35-197-153.ngrok-free.app";
-const BASE_URL = "http://127.0.0.1:8000";
+// const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = "http://192.168.1.237:8000";
 
 export const getRequest = async (API_KEY, url) => {
     let response = await axios

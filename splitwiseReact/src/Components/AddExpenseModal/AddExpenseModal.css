@@ -41,25 +41,29 @@
 .item-row {
     display: flex;
     align-items: center;
+    justify-content: space-evenly;
     margin-top: 10px;
+    padding: 5px;
 }
 
 .item-row button {
     margin-right: 5px;
 }
 
-.item-row input[type="number"],
-.item-row input[type="text"] {
+.item-row .input-container input[type="number"],
+.item-row .input-container input[type="text"] {
     margin-right: 5px;
     padding: 10px 20px;
+    flex-grow: 1;
+    width: 100%;
 }
 
-.item-row input[type="number"] {
-    width: 60px; /* Adjust as needed */
+.item-row .input-container input[type="number"] {
+    flex-grow: 1; /* Adjust as needed */
 }
 
 /* Set the width for the name input field */
-.item-row input[type="text"] {
+.item-row .input-container input[type="text"] {
     flex-grow: 1; /* This will allow the name field to take up remaining space */
 }
 
@@ -68,6 +72,7 @@
     padding: 10px;
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 
 /* Styling for the dropdown (select element) */
@@ -83,6 +88,8 @@
     -webkit-appearance: none; /* Removes default styling on iOS */
     -moz-appearance: none; /* Removes default styling on Firefox */
     appearance: none; /* Removes default styling */
+    display: flex;
+    align-items: center;
 }
 
 /* Optional: Add an arrow icon to the dropdown */
@@ -96,4 +103,84 @@
 button.saveExpense {
     width: 100%;
     box-sizing: border-box;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .modal {
+        max-width: 90%; /* Adjust modal max-width on smaller screens */
+        padding: 10px; /* Reduce padding */
+        max-height: 70vh;
+    }
+
+    .modal-close {
+        visibility: hidden; /* Adjust close button size */
+    }
+
+    button.saveExpense {
+        width: 90%;
+        box-sizing: border-box;
+    }
+
+    .item-row .input-container input[type="text"], .item-row .input-container input[type="number"], .dropdown-container select {
+        padding: 8px 15px; /* Adjust padding for inputs and select */
+    }
+
+    .modal-content, .dropdown-container, .item-row {
+        font-size: 14px; /* Adjust font size for readability */
+    }
+
+    .dropdown-container {
+        padding: 0;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+    }
+}
+
+/*.input-container {*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    margin-top: 5px;*/
+/*}*/
+
+.item-row .input-container {
+    margin-left: 10px;
+    display: flex;
+    flex-direction: row;
+}
+
+@media (max-width: 768px) {
+    .item-row {
+        flex-direction: column; /* Stack elements vertically */
+        align-items: center; /* Align items to the start of the container */
+        box-sizing: border-box;
+        justify-content: center;
+        padding-top: 10px;
+    }
+
+    .mobile-label {
+        display: block; /* Show labels on mobile */
+    }
+
+    .item-row button, .item-row .input-container input, .input-container {
+        width: 90%; /* Ensure full width usage within the container */
+        margin-top: 5px; /* Add some spacing */
+        box-sizing: border-box;
+    }
+
+    .item-row .input-container {
+        margin-left: 10px;
+        display: flex;
+        flex-grow: 1;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .item-row .input-container input {
+        width: 100%;
+    }
 }
