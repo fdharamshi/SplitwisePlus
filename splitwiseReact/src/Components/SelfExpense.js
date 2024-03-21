@@ -11,6 +11,9 @@ export const SelfExpense = (props) => {
     const [selectedCategory, setSelectedCategory] = useState('18');
     const [todaysExpenses, setTodaysExpenses] = useState([]);
 
+
+    const localUser = JSON.parse(window.localStorage.getItem("user"));
+
     useEffect(() => {
         const localUser = window.localStorage.getItem("user");
         const localApiKey = window.localStorage.getItem("API_KEY");
@@ -22,15 +25,15 @@ export const SelfExpense = (props) => {
         // let groups = await getAllGroups(window.localStorage.getItem("API_KEY"));
         // setGroups(groups);
         setGroups(props.groups);
-        findSelfGroup();
+        findSelfGroup(groups.length > 0 ? groups : props.groups);
     };
 
-    const findSelfGroup = () => {
+    const findSelfGroup = (groups) => {
         if (window.localStorage.getItem('group') !== null) {
             setSelfGroup(JSON.parse(window.localStorage.getItem('group')));
             findTodaysExpense();
-        } else if (groups['groups'] !== undefined && groups['groups'] !== null) {
-            groups['groups'].forEach(group => {
+        } else if (groups !== undefined && groups !== null) {
+            groups.forEach(group => {
                 if (group['name'].toUpperCase() === "SELF EXPENSE" && group['members'].length === 1) {
                     // TODO: Check if client is the member
                     setSelfGroup(group);
@@ -44,10 +47,11 @@ export const SelfExpense = (props) => {
     const findTodaysExpense = async () => {
         const getSelfToday = (await getTodaysSelfExpenses(window.localStorage.getItem("API_KEY")))['expenses'];
         const todaysEx = [];
+        console.log(getSelfToday);
         getSelfToday.forEach(expense => {
-            if (expense['payment'] === false && expense['deleted_at'] === null) {
+            if (expense['payment'] === false && expense['deleted_at'] === null && expense['creation_method'] !== "debt_consolidation") {
                 expense['users'].forEach(user => {
-                    if (user['user']['id'].toString() === "15746973") {
+                    if (user['user']['id'].toString() === localUser['user']['id'].toString()) {
                         todaysEx.push({
                             ...expense,
                             myShare: user['owed_share']
@@ -89,7 +93,7 @@ export const SelfExpense = (props) => {
         let added = await createSelfExpense(window.localStorage.getItem("API_KEY"), description, amount, category_id, selfGroup['id']);
         addExpenseAmount.current.value = null;
         addExpenseName.current.value = null;
-        setSelectedCategory('');
+        setSelectedCategory('18');
         // console.log(selfGroup['id']);
         // console.log(added);
         findTodaysExpense();
@@ -123,7 +127,6 @@ export const SelfExpense = (props) => {
                         <button onClick={addSelfExpense}>Add</button>
                     </div>
                     {/* Show today's expenses */}
-
                 </div>
             </div>
             {todaysExpenses.map(expense => (

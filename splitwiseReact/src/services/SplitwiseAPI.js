@@ -53,6 +53,12 @@ export const getAllExpenses = async (API_KEY) => {
     return expense;
 }
 
+export const updateExpenseRequest = async (API_KEY, id, payload) => {
+    let update = await postRequest(API_KEY, `https://secure.splitwise.com/api/v3.0/update_expense/${id}`, payload);
+
+    return update;
+}
+
 export const getTodaysSelfExpenses = async (API_KEY) => {
     const currentDate = new Date();
 

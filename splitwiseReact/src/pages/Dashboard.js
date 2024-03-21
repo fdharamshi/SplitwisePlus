@@ -1,4 +1,5 @@
 import '../styles/App.css';
+import './Dashboard.css';
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
@@ -7,16 +8,43 @@ import {getAllCategories, getAllExpenses, getAllFriends, getAllGroups, sendEmail
 import ApC from "../ApexCharts/ApC";
 import {GroupBalances} from "../Components/Groups";
 import AddExpenseModal from "../Components/AddExpenseModal/AddExpenseModal";
+import SelfExpense from "../Components/SelfExpense";
+import SearchExpense from "../Components/SearchExpense/SearchExpense";
+import GeneralExpenses from "../Components/GeneralCategories/GeneralExpenses";
 
 function Dashboard() {
 
     const [expensesData, setExpensesData] = useState();
+    const [allExpenses, setAllExpenses] = useState([]);
     const [fetched, setFetched] = useState(false);
     const [user, setUser] = useState({});
     const [categories, setCategories] = useState([]);
 
     const [allFriends, setAllFriends] = useState([]);
     const [allGroups, setAllGroups] = useState([]);
+
+    const TabConstants = {
+        GROUPS: 0,
+        SELFEXPENSE: 1,
+        GENERALEXPENSE: 2,
+        SEARCHEXPENSE: 3,
+    }
+    const [currentTab, setCurrentTab] = useState(TabConstants.GROUPS);
+    const tabs = ["Outstanding Groups", "Self Expense", "General Expense", "Search Expenses"];
+
+    const getCurrentTab = () => {
+        if (currentTab === 0) {
+            return (<GroupBalances groupsData={allGroups}/>);
+        } else if (currentTab === 1) {
+            return (fetched && <SelfExpense categories={categories} groups={allGroups}/>);
+        } else if (currentTab === 2) {
+            return (fetched && <GeneralExpenses allExpenses={allExpenses} categories={categories}/>)
+        } else if (currentTab === 3) {
+            return (fetched && <SearchExpense expenses={allExpenses} groups={allGroups}/>)
+        } else {
+            return (<GroupBalances groupsData={allGroups}/>);
+        }
+    }
 
     const navigate = useNavigate();
 
@@ -73,10 +101,12 @@ function Dashboard() {
 
     const updateExpenses = async () => {
         setFetched(false);
-        let expenses = process_data(await getAllExpenses(window.localStorage.getItem("API_KEY")));
+        let allExpenses = await getAllExpenses(window.localStorage.getItem("API_KEY"))
+        let expenses = process_data(allExpenses);
         setAllGroups((await getAllGroups(window.localStorage.getItem("API_KEY")))['groups']);
         setAllFriends((await getAllFriends(window.localStorage.getItem("API_KEY")))['friends']);
         setExpensesData(expenses);
+        setAllExpenses(allExpenses['expenses']);
         setFetched(true);
     }
 
@@ -112,8 +142,6 @@ function Dashboard() {
                 </h1>
             </div>
 
-            {/*TODO: Render only when everything is fetched*/}
-
             <select className="monthDropdown" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
                 {generateMonthOptions()}
             </select>
@@ -122,7 +150,22 @@ function Dashboard() {
 
             {fetched && ApC({data: expensesData[selectedMonth], month: selectedMonth})}
             {/*<SelfExpense categories={categories} groups={allGroups}/>*/}
-            <GroupBalances groupsData={allGroups}/>
+
+            <div className="tabs-container">
+                {tabs.map((tab, idx) => (
+                    <button
+                        key={idx}
+                        className={`tab ${currentTab === idx ? 'active' : ''}`}
+                        onClick={() => setCurrentTab(idx)}
+                    >
+                        {tab}
+                    </button>
+                ))}
+            </div>
+
+            {getCurrentTab()}
+            {/*{fetched && <SelfExpense categories={categories} groups={allGroups}/>}*/}
+            {/*<GroupBalances groupsData={allGroups}/>*/}
         </div>
     );
 }

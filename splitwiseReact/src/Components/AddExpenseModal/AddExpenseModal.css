@@ -1,4 +1,4 @@
-.modal-overlay {
+.aem-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -8,7 +8,7 @@
     z-index: 1000;
 }
 
-.modal {
+.aem-modal {
     background: white;
     position: fixed;
     top: 50%;
@@ -23,7 +23,7 @@
     overflow-y: auto; /* Enable vertical scrolling */
 }
 
-.modal-close {
+.aem-modal-close {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -33,7 +33,7 @@
     cursor: pointer;
 }
 
-.modal-content {
+.aem-modal-content {
     margin-top: 20px;
 }
 
@@ -107,13 +107,13 @@ button.saveExpense {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .modal {
+    .aem-modal {
         max-width: 90%; /* Adjust modal max-width on smaller screens */
         padding: 10px; /* Reduce padding */
         max-height: 70vh;
     }
 
-    .modal-close {
+    .aem-modal-close {
         visibility: hidden; /* Adjust close button size */
     }
 
@@ -126,7 +126,7 @@ button.saveExpense {
         padding: 8px 15px; /* Adjust padding for inputs and select */
     }
 
-    .modal-content, .dropdown-container, .item-row {
+    .aem-modal-content, .dropdown-container, .item-row {
         font-size: 14px; /* Adjust font size for readability */
     }
 
@@ -134,7 +134,7 @@ button.saveExpense {
         padding: 0;
     }
 
-    .modal-close {
+    .aem-modal-close {
         position: absolute;
         top: 0px;
         right: 0px;

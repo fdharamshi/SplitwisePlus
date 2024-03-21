@@ -10,13 +10,13 @@ const AddExpenseModal = ({isOpen, onClose, groups, allFriends}) => {
 
     return ReactDOM.createPortal(
         <>
-            <div className="modal-overlay" onClick={onClose}/>
-            <div className="modal">
-                <button className="modal-close" onClick={onClose}>
+            <div className="aem-modal-overlay" onClick={onClose}/>
+            <div className="aem-modal">
+                <button className="aem-modal-close" onClick={onClose}>
                     &times;
                 </button>
-                <div className="modal-content"><ModalChildren groups={groups} onClose={onClose}
-                                                              allFriends={allFriends}/></div>
+                <div className="aem-modal-content"><ModalChildren groups={groups} onClose={onClose}
+                                                                  allFriends={allFriends}/></div>
             </div>
         </>,
         document.getElementById('modal-root') // This is where the modal will be mounted in the HTML

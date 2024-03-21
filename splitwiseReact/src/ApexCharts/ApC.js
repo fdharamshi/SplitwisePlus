@@ -23,7 +23,7 @@ export const ApC = ({data, month}) => {
             dataLabels: {
                 enabled: true,
                 formatter: function (val) {
-                    return "$" + val;
+                    return "$" + val.toFixed(2);
                 },
                 offsetY: -20,
                 style: {
@@ -67,7 +67,7 @@ export const ApC = ({data, month}) => {
                 labels: {
                     show: true,
                     formatter: function (val) {
-                        return "$" + val;
+                        return "$" + val.toFixed(2);
                     }
                 }
 

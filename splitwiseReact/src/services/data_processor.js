@@ -4,7 +4,7 @@ export default function process_data(data) {
     const localUserId = JSON.parse(window.localStorage.getItem("user"))['user']['id'].toString(); // Retrieve user ID from local storage
 
     data['expenses'].forEach(expense => {
-        if (expense['payment'] === false && expense['deleted_at'] === null) {
+        if (expense['payment'] === false && expense['deleted_at'] === null && expense['creation_method'] !== "debt_consolidation") {
             const dateStr = expense.date;
             const date = new Date(dateStr);
             const monthYearStr = `${date.toLocaleString('default', {month: 'long'})}-${date.getFullYear()}`;

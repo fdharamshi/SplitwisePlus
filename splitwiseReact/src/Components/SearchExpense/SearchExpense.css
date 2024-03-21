@@ -1,0 +1,49 @@
+.expense-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    background-color: #f8f8f8;
+}
+
+.expense-row > div {
+    margin: 0 10px;
+    flex: 1;
+}
+
+.expense-description {
+    flex-basis: 30%;
+}
+
+.expense-cost {
+    flex-basis: 10%;
+}
+
+.expense-date {
+    flex-basis: 15%;
+}
+
+.expense-group {
+    flex-basis: 20%;
+}
+
+.expense-created-by {
+    flex-basis: 20%;
+}
+
+.expense-share {
+    flex-basis: 5%;
+}
+
+input {
+    margin: 5px 5px 10px;
+    padding: 10px 20px;
+    flex-grow: 1;
+    width: 40%;
+}
+
+.search-label {
+    font-size: large;
+    font-weight: bolder;
+}

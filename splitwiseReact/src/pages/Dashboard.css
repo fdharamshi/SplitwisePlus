@@ -1,0 +1,22 @@
+.tabs-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px; /* Space between tabs */
+    margin-bottom: 20px; /* Space below the tab container */
+}
+
+.tab {
+    padding: 10px;
+    background-color: #FFF;
+    color: #2a9d8f;
+    border: 1px solid #2a9d8f;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.tab.active {
+    border: 1px solid #ccc;
+    background-color: #2a9d8f;
+    color: #FFF;
+}
