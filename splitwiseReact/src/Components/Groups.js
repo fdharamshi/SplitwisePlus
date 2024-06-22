@@ -1,8 +1,11 @@
 import React from 'react';
 import './groups.css';
+import {useSelector} from "react-redux";
+import {selectAllGroups} from "../store/selectors/selectors";
 
-export const GroupBalances = ({groupsData}) => {
+export const GroupBalances = () => {
     const localUserId = JSON.parse(window.localStorage.getItem("user"))['user']['id'].toString();
+    const groupsData = useSelector(selectAllGroups);
 
     const calculateUserBalance = (members, userId) => {
         return members.reduce((acc, member) => {

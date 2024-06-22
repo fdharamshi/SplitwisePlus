@@ -9,8 +9,8 @@ axios.defaults.headers = {
 };
 
 // const BASE_URL = "https://018d-100-35-197-153.ngrok-free.app";
-// const BASE_URL = "http://127.0.0.1:8000";
-const BASE_URL = "http://192.168.1.237:8000";
+const BASE_URL = "http://127.0.0.1:8000";
+// const BASE_URL = "http://192.168.1.237:8000";
 
 export const getRequest = async (API_KEY, url) => {
     let response = await axios
@@ -49,7 +49,6 @@ export const getUser = async (API_KEY) => {
 
 export const getAllExpenses = async (API_KEY) => {
     let expense = await getRequest(API_KEY, "https://secure.splitwise.com/api/v3.0/get_expenses?limit=0");
-
     return expense;
 }
 

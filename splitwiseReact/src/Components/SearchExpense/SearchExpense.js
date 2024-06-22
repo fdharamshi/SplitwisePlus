@@ -1,5 +1,7 @@
 import './SearchExpense.css';
 import React, {useState} from "react";
+import {useSelector} from "react-redux";
+import {selectAllExpenses, selectAllGroups} from "../../store/selectors/selectors";
 
 function ExpenseRow({expense, groupName, createdBy, localUserID}) {
     return (
@@ -14,18 +16,20 @@ function ExpenseRow({expense, groupName, createdBy, localUserID}) {
     );
 }
 
-function SearchExpense(props) {
-    console.log(props.groups);
+function SearchExpense() {
 
     const localUserID = JSON.parse(window.localStorage.getItem("user"))['user']['id'];
     const [searchString, setSearchString] = useState("");
+
+    const expenses = useSelector(selectAllExpenses);
+    const groups = useSelector(selectAllGroups);
 
     const searchExpenseFilter = () => {
 
         const searchWords = searchString.toLowerCase().split(/\s+/);
 
         // Filter the expenses, keeping only those where every search word is found in the description
-        const filteredExpenses = props.expenses
+        const filteredExpenses = expenses
             .filter(expense => expense['payment'] === false && expense['deleted_at'] === null && expense['creation_method'] !== "debt_consolidation")
             .filter(expense => {
                 // Convert the description to lower case for case-insensitive comparison
@@ -51,7 +55,7 @@ function SearchExpense(props) {
         {searchExpenseFilter().map(expense =>
             <ExpenseRow
                 localUserID={localUserID}
-                expense={expense} groupName={props.groups.find(g => g.id === expense['group_id'])?.name ?? "N/A"}
+                expense={expense} groupName={groups.find(g => g.id === expense['group_id'])?.name ?? "N/A"}
                 createdBy="FD"/>)}
     </>);
 }
