@@ -2,31 +2,39 @@ import React, {useEffect, useRef, useState} from 'react';
 import {createSelfExpense, createSelfGroup, getTodaysSelfExpenses} from "../services/SplitwiseAPI";
 
 import './SelfExpense.css';
-import ExpenseRow from "./ExpenseRow"; // Import the CSS file
+import ExpenseRow from "./ExpenseRow";
+import {useSelector} from "react-redux";
+import {selectAllCategories, selectAllExpenses, selectAllGroups} from "../store/selectors/selectors"; // Import the CSS file
 
-export const SelfExpense = (props) => {
+export const SelfExpense = () => {
 
-    const [groups, setGroups] = useState({});
+    // const [groups, setGroups] = useState({});
     const [selfGroup, setSelfGroup] = useState({});
     const [selectedCategory, setSelectedCategory] = useState('18');
     const [todaysExpenses, setTodaysExpenses] = useState([]);
 
+    const allExpenses = useSelector(selectAllExpenses);
+    const allCategories = useSelector(selectAllCategories);
+    const groups = useSelector(selectAllGroups);
+
 
     const localUser = JSON.parse(window.localStorage.getItem("user"));
 
+    // useEffect(() => {
+    //     handleFetchExpenses();
+    // }, []);
+
+    // const handleFetchExpenses = async () => {
+    //     // let groups = await getAllGroups(window.localStorage.getItem("API_KEY"));
+    //     // setGroups(groups);
+    //     findSelfGroup(groups.length > 0 ? groups : props.groups);
+    // };
+
     useEffect(() => {
-        const localUser = window.localStorage.getItem("user");
-        const localApiKey = window.localStorage.getItem("API_KEY");
-
-        handleFetchExpenses();
-    }, []);
-
-    const handleFetchExpenses = async () => {
-        // let groups = await getAllGroups(window.localStorage.getItem("API_KEY"));
-        // setGroups(groups);
-        setGroups(props.groups);
-        findSelfGroup(groups.length > 0 ? groups : props.groups);
-    };
+        if (groups.length > 0) {
+            findSelfGroup(groups);
+        }
+    }, [groups])
 
     const findSelfGroup = (groups) => {
         if (window.localStorage.getItem('group') !== null) {
@@ -119,7 +127,7 @@ export const SelfExpense = (props) => {
                         <div>
                             <label htmlFor="dropdown">Select an Option:</label>
                             <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
-                                {props.categories?.categories && renderOptions(props.categories.categories)}
+                                {allCategories?.categories && renderOptions(allCategories.categories)}
                             </select>
                         </div>
                         <input type="text" placeholder="Description" ref={addExpenseName}/>
@@ -130,7 +138,7 @@ export const SelfExpense = (props) => {
                 </div>
             </div>
             {todaysExpenses.map(expense => (
-                <ExpenseRow key={expense['id']} expense={expense} categories={props.categories}/>
+                <ExpenseRow key={expense['id']} expense={expense} categories={allCategories}/>
             ))}
         </>
     );

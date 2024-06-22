@@ -9,3 +9,7 @@ export const fetchExpenseReducer = (state, action) => {
 export const fetchGroupsReducer = (state, action) => {
     state.groups = action.payload;
 }
+
+export const fetchCategoriesReducer = (state, action) => {
+    state.categories = action.payload;
+}

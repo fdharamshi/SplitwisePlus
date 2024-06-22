@@ -9,3 +9,7 @@ export const selectExpensesFetched = (state) => {
 export const selectAllGroups = (state) => {
     return state.groups;
 }
+
+export const selectAllCategories = (state) => {
+    return state.categories;
+}

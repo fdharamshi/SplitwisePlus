@@ -4,7 +4,7 @@ import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import process_data from "../services/data_processor";
-import {getAllCategories, getAllFriends, sendEmail} from "../services/SplitwiseAPI";
+import {getAllFriends, sendEmail} from "../services/SplitwiseAPI";
 import ApC from "../ApexCharts/ApC";
 import {GroupBalances} from "../Components/Groups";
 import AddExpenseModal from "../Components/AddExpenseModal/AddExpenseModal";
@@ -14,14 +14,17 @@ import GeneralExpenses from "../Components/GeneralCategories/GeneralExpenses";
 import BatchExpenseModal from "../Components/BatchExpenseModal/BatchExpenseModal";
 import {useDispatch, useSelector} from "react-redux";
 import {addAction} from "../store/actions/addAction";
-import {fetchExpenses, fetchGroups} from "../store/actions/asyncActions";
-import {selectAllExpenses, selectAllGroups, selectExpensesFetched} from "../store/selectors/selectors";
+import {fetchCategoriesAction, fetchExpenses, fetchGroups} from "../store/actions/asyncActions";
+import {
+    selectAllCategories,
+    selectAllExpenses,
+    selectAllGroups,
+    selectExpensesFetched
+} from "../store/selectors/selectors";
 
 function Dashboard() {
 
     const [user, setUser] = useState({});
-    const [categories, setCategories] = useState([]);
-
     const [allFriends, setAllFriends] = useState([]);
 
     const [selectedGroup, setSelectedGroup] = useState("all");
@@ -35,8 +38,8 @@ function Dashboard() {
     const allExpenses = useSelector(selectAllExpenses);
     const expensesData = process_data({'expenses': allExpenses});
     const fetched = useSelector(selectExpensesFetched);
-
     const allGroups = useSelector(selectAllGroups);
+    const categories = useSelector(selectAllCategories);
 
     const TabConstants = {
         GROUPS: 0,
@@ -51,13 +54,13 @@ function Dashboard() {
         if (currentTab === 0) {
             return (<GroupBalances/>);
         } else if (currentTab === 1) {
-            return (fetched && <SelfExpense categories={categories} groups={allGroups}/>);
+            return (fetched && <SelfExpense/>);
         } else if (currentTab === 2) {
-            return (fetched && <GeneralExpenses allExpenses={allExpenses} categories={categories}/>)
+            return (fetched && <GeneralExpenses/>)
         } else if (currentTab === 3) {
             return (fetched && <SearchExpense/>)
         } else {
-            return (<GroupBalances groupsData={allGroups}/>);
+            return (<GroupBalances/>);
         }
     }
 
@@ -130,9 +133,9 @@ function Dashboard() {
     }
 
     const parseCategories = async () => {
-        let allCategories = await getAllCategories(window.localStorage.getItem("API_KEY"));
+        // let allCategories = await getAllCategories(window.localStorage.getItem("API_KEY"));
         // const arrayOfCategories = allCategories['categories'].flatMap(mainCategory => mainCategory['subcategories']);
-        setCategories(allCategories);
+        // setCategories(allCategories);
     }
 
     const handleCheckboxChange = (checkboxType) => {
@@ -155,7 +158,7 @@ function Dashboard() {
         } else {
             setUser(JSON.parse(localUser));
             updateExpenses();
-            parseCategories();
+            dispatch(fetchCategoriesAction());
         }
     }, []);
 
