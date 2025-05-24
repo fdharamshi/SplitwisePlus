@@ -24,26 +24,40 @@ export const ExpenseRow = (props) => {
 
     return (
         <div className="ExpenseRow">
-            <span className="description">{formattedDate} | {props.expense['description']}</span>
-            <div className="category-div">
-                <label htmlFor="categoryDropdown" className="category-label">Category:</label>
-                <select
-                    id="categoryDropdown"
-                    className="category-select"
-                    value={selectedCategory}
-                    onChange={(event) => updateExpense(event.target.value)}
-                >
-                    <option value="">Select a category</option>
-                    {props.categories?.categories.flatMap(mainCategory => mainCategory['subcategories']).map((option) => (
-                        <option key={option.id} value={option.id}>
-                            {option.name}
-                        </option>
-                    ))}
-                </select>
+            <div className="expense-header">
+                <div className="expense-date-badge">{formattedDate}</div>
+                <h3 className="description">{props.expense['description']}</h3>
             </div>
-
-            <span className="cost">Cost: ${props.expense['cost']}</span>
-            <span className="cost">MyShare: ${props.expense['myShare']}</span>
+            
+            <div className="expense-details">
+                <div className="expense-amount">
+                    <div className="amount-block">
+                        <span className="amount-label">Total Cost</span>
+                        <span className="amount-value">${parseFloat(props.expense['cost']).toFixed(2)}</span>
+                    </div>
+                    <div className="amount-block">
+                        <span className="amount-label">My Share</span>
+                        <span className="amount-value">${parseFloat(props.expense['myShare']).toFixed(2)}</span>
+                    </div>
+                </div>
+                
+                <div className="category-div">
+                    <label htmlFor="categoryDropdown" className="category-label">Category</label>
+                    <select
+                        id="categoryDropdown"
+                        className="category-select"
+                        value={selectedCategory}
+                        onChange={(event) => updateExpense(event.target.value)}
+                    >
+                        <option value="">Select a category</option>
+                        {props.categories?.categories.flatMap(mainCategory => mainCategory['subcategories']).map((option) => (
+                            <option key={option.id} value={option.id}>
+                                {option.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
         </div>
     );
 };

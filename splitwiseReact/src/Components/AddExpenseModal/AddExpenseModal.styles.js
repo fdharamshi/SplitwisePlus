@@ -12,6 +12,11 @@ export const ModalOverlay = styled.div`
   align-items: center;
   z-index: 1000;
   backdrop-filter: blur(3px);
+  
+  @media (max-width: 768px) {
+    background-color: transparent;
+    backdrop-filter: none;
+  }
 `;
 
 export const ModalContainer = styled.div`
@@ -30,6 +35,19 @@ export const ModalContainer = styled.div`
   display: flex;
   flex-direction: row;
   border: 1px solid ${({ theme }) => theme.ui.border};
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    max-width: 100vw;
+    top: 0;
+    left: 0;
+    transform: none;
+    border-radius: 0;
+    border: none;
+  }
 `;
 
 export const CloseButton = styled.button`
@@ -49,6 +67,18 @@ export const CloseButton = styled.button`
   align-items: center;
   justify-content: center;
   z-index: 10;
+  
+  @media (max-width: 768px) {
+    top: 12px;
+    left: 12px;
+    right: auto;
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   
   &:hover {
     color: ${({ theme }) => theme.text.primary};
@@ -227,10 +257,22 @@ export const ButtonGroup = styled.div`
 export const FormSide = styled.div`
   flex: 1;
   padding: ${({ theme }) => theme.spacing.lg};
-  max-width: 65%;
   border-right: 1px solid ${({ theme }) => theme.ui.border};
+  overflow-y: auto;
+  min-width: 65%;
+  max-width: 65%;
   display: flex;
   flex-direction: column;
+  
+  @media (max-width: 768px) {
+    min-width: 100%;
+    max-width: 100%;
+    border-right: none;
+    border-bottom: 1px solid ${({ theme }) => theme.ui.border};
+    display: ${({ activeTab, isMobile }) => isMobile && activeTab !== 'form' ? 'none' : 'flex'};
+    max-height: ${({ isMobile }) => isMobile ? 'calc(95vh - 60px)' : 'auto'};
+    padding-bottom: 120px; /* Add bottom padding for better scrolling on mobile */
+  }
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: ${({ theme }) => `${theme.ui.border} transparent`};
@@ -251,6 +293,8 @@ export const FormSide = styled.div`
 
 export const ReceiptSide = styled.div`
   width: 35%;
+  min-width: 35%;
+  max-width: 35%;
   padding: ${({ theme }) => theme.spacing.lg};
   background-color: ${({ theme }) => theme.background.tertiary};
   display: flex;
@@ -258,6 +302,14 @@ export const ReceiptSide = styled.div`
   position: relative;
   overflow-y: auto;
   max-height: 90vh;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: ${({ theme }) => theme.spacing.md};
+    display: ${({ activeTab, isMobile }) => isMobile && activeTab !== 'receipt' ? 'none' : 'block'};
+    max-height: ${({ isMobile }) => isMobile ? 'calc(95vh - 60px)' : '90vh'};
+    padding-bottom: 120px; /* Add bottom padding for better scrolling on mobile */
+  }
   
   &::before {
     content: '';
@@ -272,26 +324,30 @@ export const ReceiptSide = styled.div`
 `;
 
 export const ReceiptTitle = styled.h3`
+  margin: 0 0 ${({ theme }) => theme.spacing.md} 0;
   color: ${({ theme }) => theme.text.primary};
-  margin-top: 0;
-  margin-bottom: ${({ theme }) => theme.spacing.md};
-  padding-bottom: ${({ theme }) => theme.spacing.sm};
-  border-bottom: 1px dashed ${({ theme }) => theme.ui.border};
+  font-size: 1.25rem;
+  font-weight: 600;
   text-align: center;
+  letter-spacing: 0.5px;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+    margin-bottom: ${({ theme }) => theme.spacing.sm};
+  }
 `;
 
 export const ReceiptItem = styled.div`
-  padding: ${({ theme }) => theme.spacing.md};
-  border-bottom: 1px solid ${({ theme }) => theme.ui.border};
-  margin-bottom: ${({ theme }) => theme.spacing.sm};
   background-color: ${({ theme }) => theme.background.secondary};
   border-radius: ${({ theme }) => theme.borderRadius.medium};
+  padding: ${({ theme }) => theme.spacing.md};
+  margin-bottom: ${({ theme }) => theme.spacing.md};
   box-shadow: ${({ theme }) => theme.shadow.small};
-  transition: all 0.2s ease;
+  border: 1px solid ${({ theme }) => theme.ui.border};
   
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: ${({ theme }) => theme.shadow.medium};
+  @media (max-width: 768px) {
+    padding: ${({ theme }) => theme.spacing.sm};
+    margin-bottom: ${({ theme }) => theme.spacing.sm};
   }
 `;
 
@@ -323,15 +379,28 @@ export const MembersList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: ${({ theme }) => theme.spacing.xs};
-  margin-top: ${({ theme }) => theme.spacing.xs};
+  margin-top: ${({ theme }) => theme.spacing.sm};
+  
+  @media (max-width: 768px) {
+    margin-top: ${({ theme }) => theme.spacing.xs};
+  }
 `;
 
 export const MemberTag = styled.span`
-  font-size: 0.75rem;
-  background-color: ${({ theme }) => theme.background.tag || '#e9ecef'};
-  color: ${({ theme }) => theme.text.secondary};
-  padding: 2px 6px;
+  display: inline-flex;
+  align-items: center;
+  background: ${({ theme }) => theme.background.tag};
+  color: ${({ theme }) => theme.text.primary};
+  padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.sm}`};
   border-radius: ${({ theme }) => theme.borderRadius.small};
+  font-size: 0.85rem;
+  margin-right: ${({ theme }) => theme.spacing.xs};
+  margin-bottom: ${({ theme }) => theme.spacing.xs};
+  
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.xs}`};
+  }
 `;
 
 export const TotalSection = styled.div`

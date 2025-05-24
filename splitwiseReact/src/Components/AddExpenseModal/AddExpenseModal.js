@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import styled from 'styled-components';
 import ItemList from "./ItemList";
@@ -7,6 +7,7 @@ import Select from 'react-select';
 import { useDispatch } from "react-redux";
 import { fetchExpenses } from "../../store/actions/asyncActions";
 import { useTheme } from '../../theme/ThemeContext';
+import TabNavigation from "./TabNavigation";
 import {
   ModalOverlay,
   ModalContainer,
@@ -44,7 +45,7 @@ const AddExpenseModal = ({isOpen, onClose, groups, allFriends, categories}) => {
             <ModalOverlay onClick={onClose} />
             <ModalContainer onClick={e => e.stopPropagation()}>
                 <CloseButton onClick={onClose}>
-                    &times;
+                    {window.innerWidth <= 768 ? '←' : '×'}
                 </CloseButton>
                 <ModalChildren groups={groups} onClose={onClose} allFriends={allFriends} categories={categories} />
             </ModalContainer>
@@ -54,7 +55,20 @@ const AddExpenseModal = ({isOpen, onClose, groups, allFriends, categories}) => {
 };
 
 const ModalChildren = (props) => {
+    // Check if we're on a mobile device using window.innerWidth
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [activeTab, setActiveTab] = useState('form');
 
+    // Add window resize listener to update isMobile state
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    
     const [selectedGroupId, setSelectedGroupId] = useState(props.groups[0]?.id || '');
     const selectedGroup = props.groups.find(group => group.id == selectedGroupId);
     const [selectedFriends, setSelectedFriends] = useState([]);
@@ -164,9 +178,33 @@ const ModalChildren = (props) => {
         }),
     };
 
+    // Add meta tag to prevent zooming on input focus in mobile
+    useEffect(() => {
+        if (isMobile) {
+            // Create a meta tag to prevent zooming on input focus
+            let viewportMeta = document.querySelector('meta[name="viewport"]');
+            if (!viewportMeta) {
+                viewportMeta = document.createElement('meta');
+                viewportMeta.name = 'viewport';
+                document.head.appendChild(viewportMeta);
+            }
+            viewportMeta.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no';
+            
+            // Clean up when component unmounts
+            return () => {
+                if (viewportMeta) {
+                    viewportMeta.content = 'width=device-width, initial-scale=1';
+                }
+            };
+        }
+    }, [isMobile]);
+    
     return (
         <>
-            <FormSide>
+            {isMobile && (
+                <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+            )}
+            <FormSide activeTab={activeTab} isMobile={isMobile}>
                 <FormGroup>
                     <FormLabel>Group</FormLabel>
                     <FormSelect value={selectedGroupId} onChange={handleSelectionChange}>
@@ -204,18 +242,13 @@ const ModalChildren = (props) => {
                     <ItemList 
                         groupMembers={selectedGroupId == 0 ? selectedFriends : groupMembers} 
                         saveExpense={saveExpense}
-                        selectedFriends={selectedFriends}
-                        setSelectedFriends={setSelectedFriends}
-                        categories={props.categories}
                         onItemsChange={updateReceiptView}
-                        setTipExternal={setTip}
-                        setTaxExternal={setTax}
-                        setDescriptionExternal={setDescription}
+                        isMobile={isMobile}
                     />
                 </div>
             </FormSide>
             
-            <ReceiptSide>
+            <ReceiptSide activeTab={activeTab} isMobile={isMobile}>
                 <ReceiptTitle>Receipt Summary</ReceiptTitle>
                 <div className="receipt-items">
                     {items.map((item, index) => {

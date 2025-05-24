@@ -48,11 +48,20 @@ export const FormRow = styled.div`
   gap: ${({ theme }) => theme.spacing.md};
   margin-bottom: ${({ theme }) => theme.spacing.md};
   flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    flex-direction: ${props => props.stackOnMobile ? 'column' : 'row'};
+    gap: ${({ theme }) => theme.spacing.sm};
+  }
 `;
 
 export const FormField = styled.div`
   flex: 1;
   min-width: 200px;
+  
+  @media (max-width: 768px) {
+    min-width: ${props => props.fullWidthOnMobile ? '100%' : '120px'};
+  }
 `;
 
 export const Input = styled.input`
@@ -146,6 +155,10 @@ export const ItemCard = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.medium};
   padding: ${({ theme }) => theme.spacing.md};
   margin-bottom: ${({ theme }) => theme.spacing.md};
+  
+  @media (max-width: 768px) {
+    padding: ${({ theme }) => theme.spacing.sm};
+  }
 `;
 
 export const ItemHeader = styled.div`
@@ -165,6 +178,10 @@ export const MemberList = styled.div`
   flex-wrap: wrap;
   gap: ${({ theme }) => theme.spacing.sm};
   margin-top: ${({ theme }) => theme.spacing.sm};
+  
+  @media (max-width: 768px) {
+    gap: ${({ theme }) => theme.spacing.xs};
+  }
 `;
 
 export const ShareButton = styled.button`
@@ -199,6 +216,10 @@ export const ShareButton = styled.button`
 `;
 
 export const MemberChip = styled.div`
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+    padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.sm}`};
+  }
   display: inline-flex;
   align-items: center;
   background-color: ${({ theme, included, active }) => 

@@ -1,5 +1,74 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import Tesseract from 'tesseract.js';
+import styled from 'styled-components';
+
+const ItemizationContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+  }
+`;
+
+const FileInputContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+const UploadButton = styled.button`
+  padding: 0.5rem 1rem;
+  background-color: #5bc5a7;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin-top: 0.5rem;
+  }
+`;
+
+const ItemsContainer = styled.div`
+  margin-top: 1rem;
+  
+  @media (max-width: 768px) {
+    overflow-x: auto;
+  }
+`;
+
+const ItemTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+  }
+  
+  th, td {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    text-align: left;
+    
+    @media (max-width: 768px) {
+      padding: 0.4rem;
+    }
+  }
+  
+  th {
+    background-color: #f5f5f5;
+  }
+`;
 
 // TODO: Add different types of price formats
 
@@ -79,29 +148,64 @@ const Itemization = (props) => {
     };
 
     return (
-        <div>
-            <input type="file" onChange={handleChange} accept="image/*"/>
-            <button onClick={handleUpload} disabled={isProcessing}>
-                {isProcessing ? 'Processing...' : 'Upload and Process Receipt'}
-            </button>
-            {isProcessing && (
-                <div style={{
-                    width: '100%',
-                    backgroundColor: '#ddd',
-                    borderRadius: '4px',
-                    margin: '10px 0',
-                    overflow: 'hidden' // To maintain the border-radius effect
-                }}>
+        <ItemizationContainer>
+            <FileInputContainer>
+                <input type="file" onChange={handleChange} accept="image/*"/>
+                {!isProcessing && !image && (
+                    <UploadButton disabled={true}>Select an image to continue</UploadButton>
+                )}
+                {image && (
+                    <>
+                        <UploadButton onClick={handleUpload} disabled={isProcessing}>
+                            {isProcessing ? `Processing... ${Math.round(ocrProgress * 100)}%` : 'Upload and Process'}
+                        </UploadButton>
+                        <div style={{ marginTop: '1rem' }}>
+                            <img src={image} alt="Receipt" style={{maxWidth: '100%', maxHeight: '300px'}} />
+                        </div>
+                    </>
+                )}
+                {isProcessing && (
                     <div style={{
-                        height: '20px',
-                        backgroundColor: '#2a9d8f',
-                        width: `${ocrProgress * 100}%`,
-                        transition: 'width 0.3s ease'
+                        width: '100%',
+                        backgroundColor: '#ddd',
+                        borderRadius: '4px',
+                        margin: '10px 0',
+                        overflow: 'hidden' // To maintain the border-radius effect
                     }}>
+                        <div style={{
+                            height: '20px',
+                            backgroundColor: '#2a9d8f',
+                            width: `${ocrProgress * 100}%`,
+                            transition: 'width 0.3s ease'
+                        }}></div>
                     </div>
-                </div>
+                )}
+            </FileInputContainer>
+
+            {items.length > 0 && (
+                <ItemsContainer>
+                    <h3>Extracted Items:</h3>
+                    <ItemTable>
+                        <thead>
+                            <tr>
+                                <th>Quantity</th>
+                                <th>Item</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {items.map((item, index) => (
+                                <tr key={index}>
+                                    <td>{item.quantity || '1'}</td>
+                                    <td>{item.name}</td>
+                                    <td>${parseFloat(item.price).toFixed(2)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </ItemTable>
+                </ItemsContainer>
             )}
-        </div>
+        </ItemizationContainer>
     );
 };
 

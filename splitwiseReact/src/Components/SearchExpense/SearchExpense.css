@@ -2,14 +2,65 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    background-color: #f8f8f8;
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color, #333);
+    background-color: var(--secondary-bg-color, #2c2c2c);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+    
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        border-left: 3px solid var(--accent-color, #3f51b5);
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px;
+    }
 }
 
 .expense-row > div {
-    margin: 0 10px;
+    padding: 0 10px;
     flex: 1;
+    color: var(--text-color, #e0e0e0);
+    display: flex;
+    flex-direction: column;
+    
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        margin: 6px 0;
+        width: 100%;
+        padding: 0;
+    }
+}
+
+.expense-row .label {
+    font-size: 0.75rem;
+    color: var(--text-muted, #888);
+    margin-bottom: 4px;
+    display: none;
+    
+    @media (max-width: 768px) {
+        display: block;
+    }
+}
+
+.expense-row .value {
+    font-weight: 500;
+}
+
+.expense-description .value {
+    font-weight: 600;
+}
+
+.expense-cost .value, .expense-share .value {
+    color: var(--accent-color, #3f51b5);
+    font-weight: 600;
 }
 
 .expense-description {
@@ -37,13 +88,114 @@
 }
 
 input {
-    margin: 5px 5px 10px;
-    padding: 10px 20px;
+    margin: 5px 5px 24px;
+    padding: 14px 16px;
     flex-grow: 1;
     width: 40%;
+    background-color: var(--input-bg-color, #333);
+    border: 1px solid var(--border-color, #444);
+    color: var(--text-color, #e0e0e0);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    outline: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) inset;
+    
+    &:focus {
+        border-color: var(--accent-color, #3f51b5);
+        box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2);
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        width: calc(100% - 32px);
+        margin: 8px 0 16px;
+    }
 }
 
 .search-label {
     font-size: large;
     font-weight: bolder;
+    color: var(--text-color, #e0e0e0);
+    display: block;
+    margin-bottom: 8px;
+}
+
+.expense-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 2px solid var(--accent-color, #3f51b5);
+    background-color: var(--background-color, #1e1e1e);
+    margin-bottom: 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--accent-color, #3f51b5);
+    border-radius: 8px 8px 0 0;
+    
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        display: none; /* Hide headers on mobile as we're using a stacked layout */
+    }
+}
+
+.expense-header-row > div {
+    padding: 0 10px;
+    flex: 1;
+}
+
+.expense-results {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    padding: 8px;
+    
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        max-height: calc(100vh - 150px);
+        padding: 0;
+    }
+}
+
+/* Additional mobile responsiveness */
+@media (max-width: 768px) {
+    .expense-description {
+        font-size: 1rem;
+        font-weight: bold;
+        order: 1;
+    }
+    
+    .expense-cost {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: var(--accent-color, #ff5252);
+        order: 2;
+    }
+    
+    .expense-date {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        order: 3;
+    }
+    
+    .expense-group {
+        font-size: 0.9rem;
+        order: 4;
+    }
+    
+    .expense-created-by {
+        font-size: 0.85rem;
+        opacity: 0.7;
+        order: 5;
+    }
+    
+    .expense-share {
+        font-size: 1rem;
+        font-weight: bold;
+        color: var(--accent-color, #4caf50);
+        order: 6;
+        margin-top: 8px;
+    }
 }
