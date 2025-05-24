@@ -305,8 +305,10 @@ export const ReceiptSide = styled.div`
   
   @media (max-width: 768px) {
     width: 100%;
+    min-width: 100%;
+    max-width: 100%;
     padding: ${({ theme }) => theme.spacing.md};
-    display: ${({ activeTab, isMobile }) => isMobile && activeTab !== 'receipt' ? 'none' : 'block'};
+    display: ${({ activeTab, isMobile }) => isMobile && activeTab !== 'receipt' ? 'none' : 'flex'};
     max-height: ${({ isMobile }) => isMobile ? 'calc(95vh - 60px)' : '90vh'};
     padding-bottom: 120px; /* Add bottom padding for better scrolling on mobile */
   }
@@ -320,6 +322,10 @@ export const ReceiptSide = styled.div`
     height: 100%;
     background: linear-gradient(90deg, transparent, ${({ theme }) => theme.background.tertiary});
     z-index: 1;
+    
+    @media (max-width: 768px) {
+      display: none;
+    }
   }
 `;
 
@@ -333,7 +339,8 @@ export const ReceiptTitle = styled.h3`
   
   @media (max-width: 768px) {
     font-size: 1.1rem;
-    margin-bottom: ${({ theme }) => theme.spacing.sm};
+    margin: ${({ theme }) => theme.spacing.sm} 0;
+    padding: ${({ theme }) => theme.spacing.xs} 0;
   }
 `;
 
@@ -346,8 +353,10 @@ export const ReceiptItem = styled.div`
   border: 1px solid ${({ theme }) => theme.ui.border};
   
   @media (max-width: 768px) {
-    padding: ${({ theme }) => theme.spacing.sm};
-    margin-bottom: ${({ theme }) => theme.spacing.sm};
+    padding: ${({ theme }) => theme.spacing.md};
+    margin-bottom: ${({ theme }) => theme.spacing.md};
+    width: 100%;
+    box-sizing: border-box;
   }
 `;
 
@@ -356,23 +365,42 @@ export const ItemHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: ${({ theme }) => theme.spacing.xs};
+  
+  @media (max-width: 768px) {
+    margin-bottom: ${({ theme }) => theme.spacing.sm};
+  }
 `;
 
 export const ItemName = styled.span`
   flex: 1;
   font-weight: 500;
   color: ${({ theme }) => theme.text.primary};
+  
+  @media (max-width: 768px) {
+    font-size: 1.05rem;
+  }
 `;
 
 export const ItemPrice = styled.span`
   color: ${({ theme }) => theme.text.accent || theme.text.primary};
   font-weight: 600;
+  
+  @media (max-width: 768px) {
+    font-size: 1.05rem;
+    margin-left: ${({ theme }) => theme.spacing.sm};
+  }
 `;
 
 export const ItemDetails = styled.div`
   font-size: 0.875rem;
   color: ${({ theme }) => theme.text.secondary};
   margin: ${({ theme }) => theme.spacing.xs} 0;
+  
+  @media (max-width: 768px) {
+    font-size: 0.925rem;
+    margin: ${({ theme }) => theme.spacing.sm} 0;
+    padding: 0 ${({ theme }) => theme.spacing.xs};
+  }
 `;
 
 export const MembersList = styled.div`
@@ -407,12 +435,22 @@ export const TotalSection = styled.div`
   margin-top: auto;
   padding-top: ${({ theme }) => theme.spacing.md};
   border-top: 2px dashed ${({ theme }) => theme.ui.border};
+  
+  @media (max-width: 768px) {
+    margin-top: ${({ theme }) => theme.spacing.lg};
+    padding-top: ${({ theme }) => theme.spacing.sm};
+  }
 `;
 
 export const TotalRow = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: ${({ theme }) => theme.spacing.xs};
+  
+  @media (max-width: 768px) {
+    padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.xs};
+    font-size: 1rem;
+  }
   
   &.grand-total {
     font-weight: 700;
@@ -421,12 +459,23 @@ export const TotalRow = styled.div`
     padding-top: ${({ theme }) => theme.spacing.sm};
     border-top: 1px solid ${({ theme }) => theme.ui.border};
     color: ${({ theme }) => theme.text.primary};
+    
+    @media (max-width: 768px) {
+      font-size: 1.2rem;
+      margin-top: ${({ theme }) => theme.spacing.md};
+      padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.xs};
+    }
   }
 `;
 
 export const SaveButtonContainer = styled.div`
   margin-top: ${({ theme }) => theme.spacing.md};
   text-align: center;
+  
+  @media (max-width: 768px) {
+    margin-top: ${({ theme }) => theme.spacing.lg};
+    padding-bottom: ${({ theme }) => theme.spacing.lg};
+  }
 `;
 
 export const SaveButton = styled.button`
@@ -440,6 +489,13 @@ export const SaveButton = styled.button`
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
+  
+  @media (max-width: 768px) {
+    padding: ${({ theme }) => theme.spacing.md};
+    font-size: 1.1rem;
+    margin-bottom: ${({ theme }) => theme.spacing.sm};
+    border-radius: ${({ theme }) => theme.borderRadius.medium};
+  }
   
   &:hover {
     background-color: ${({ theme }) => theme.background.buttonHover};
