@@ -1,21 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { useTheme } from '../../theme/ThemeContext';
-import {
-  ItemListContainer,
-  FormSection,
-  SectionTitle,
-  FormRow,
-  FormField,
-  Input,
-  Button,
-  ItemCard,
-  ItemHeader,
-  ItemTitle,
-  MemberList,
-  MemberChip,
-  Divider,
-  TotalAmount
-} from './ItemList.styles';
+import './ItemList.css';
 
 const Decimal = require('decimal.js');
 
@@ -23,7 +7,7 @@ Decimal.config({
     decimalPlaces: 2
 });
 
-const ItemList = ({groupMembers, saveExpense, onItemsChange}) => {
+const ItemList = ({groupMembers, saveExpense}) => {
     const [items, setItems] = useState([]);
     const [tip, setTip] = useState(0.0);
     const [tax, setTax] = useState(0.0);
@@ -40,13 +24,6 @@ const ItemList = ({groupMembers, saveExpense, onItemsChange}) => {
     const handleDescriptionChange = (event) => {
         setDescription(event.target.value);
     };
-    
-    // Update parent component whenever items, tip, tax, or description change
-    useEffect(() => {
-        if (onItemsChange) {
-            onItemsChange(items, tip, tax, description);
-        }
-    }, [items, tip, tax, description, onItemsChange]);
 
     function formatRequest() {
         const memberCosts = calculateMemberCost();
@@ -267,162 +244,107 @@ const ItemList = ({groupMembers, saveExpense, onItemsChange}) => {
         }, 0);
     }
 
-    const theme = useTheme();
-    
     return (
-        <ItemListContainer>
-            <FormSection>
-                <SectionTitle>Expense Details</SectionTitle>
-                <FormRow>
-                    <FormField>
-                        <label htmlFor="title-input">Expense Title</label>
-                        <Input
-                            id="title-input"
-                            type="text"
-                            placeholder="Enter expense title"
-                            value={description}
-                            onChange={handleDescriptionChange}
-                        />
-                    </FormField>
-                    
-                    <FormField>
-                        <label htmlFor="payer-select">Paid By</label>
-                        <Input
-                            as="select"
-                            id="payer-select" 
-                            value={selectedPayer} 
-                            onChange={handlePayerChange}
-                        >
-                            <option value="">Select a payer</option>
-                            {groupMembers.map((member) => (
-                                <option key={member.id} value={member.id}>
-                                    {member.first_name} {member.last_name}
-                                </option>
-                            ))}
-                        </Input>
-                    </FormField>
-                </FormRow>
-                
-                <FormRow>
-                    <FormField>
-                        <label htmlFor="tip-input">Tip Amount</label>
-                        <Input
-                            id="tip-input"
-                            type="number"
-                            placeholder="0.00"
-                            value={tip}
-                            onChange={(e) => setTip(parseFloat(e.target.value) || 0)}
-                        />
-                    </FormField>
-                    
-                    <FormField>
-                        <label htmlFor="tax-input">Tax Amount</label>
-                        <Input
-                            id="tax-input"
-                            type="number"
-                            placeholder="0.00"
-                            value={tax}
-                            onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
-                        />
-                    </FormField>
-                </FormRow>
-                
-                <TotalAmount>
-                    <div>Subtotal: <strong>${getTotals().toFixed(2)}</strong></div>
-                    <div>Total with Tip & Tax: <strong>${(getTotals() + tip + tax).toFixed(2)}</strong></div>
-                </TotalAmount>
-            </FormSection>
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: theme.spacing.md }}>
-                <Button variant="secondary" onClick={handleAddItem}>
-                    + Add New Item
-                </Button>
-                <Button onClick={formatRequest} data-action="save-expense">
-                    Save Expense
-                </Button>
+        <div>
+            <button className="saveExpense" onClick={formatRequest}>Save Expense</button>
+            {/*<Itemization callback={updateItemsFromReceipt}/>*/}
+            <span
+                className="totals-span">Total: ${getTotals()}<br/>Total with Tip & Tax: ${getTotals() + tip + tax} </span>
+            <div className="financial-inputs">
+                <div className="input-group">
+                    <label htmlFor="tip-input">Enter Tip:</label>
+                    <input
+                        id="tip-input"
+                        type="number"
+                        value={tip}
+                        onChange={(e) => setTip(parseFloat(e.target.value) || 0)}
+                    />
+                </div>
+                <div className="input-group">
+                    <label htmlFor="tax-input">Enter Tax:</label>
+                    <input
+                        id="tax-input"
+                        type="number"
+                        value={tax}
+                        onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
+                    />
+                </div>
+                <div className="payer-dropdown-container">
+                    <label htmlFor="payer-select">Select Payer:</label>
+                    <select id="payer-select" value={selectedPayer} onChange={handlePayerChange}>
+                        <option value="">Select a member</option>
+                        {groupMembers.map((member) => (
+                            <option key={member.id} value={member.id}>
+                                {member.first_name} {member.last_name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className="input-group">
+                    <label htmlFor="title-input">Enter Expense Title</label>
+                    <input
+                        id="title-input"
+                        type="text"
+                        placeholder="Expense Title"
+                        value={description}
+                        onChange={handleDescriptionChange}
+                    />
+                </div>
             </div>
-            
+            <button className="saveExpense" onClick={handleAddItem}>+ Add An Item</button>
             {items.map((item, index) => (
-                <ItemCard key={index}>
-                    <ItemHeader>
-                        <ItemTitle>{item.name || `Item ${index + 1}`}</ItemTitle>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                            <Button 
-                                variant="secondary" 
-                                onClick={() => handleDuplicateItem(index)}
-                                style={{ padding: '4px 8px', minHeight: '32px' }}
-                            >
-                                Duplicate
-                            </Button>
-                            <Button 
-                                variant="danger" 
-                                onClick={() => handleRemoveItem(index)}
-                                style={{ padding: '4px 8px', minHeight: '32px' }}
-                            >
-                                Remove
-                            </Button>
-                        </div>
-                    </ItemHeader>
-                    
-                    <FormRow>
-                        <FormField>
-                            <label>Item Name</label>
-                            <Input
+                <div key={index}>
+                    <div className={`item-row ${item.quantity == 0 || item.price == 0 ? 'alert-row' : ''}`}>
+                        <button onClick={() => handleDuplicateItem(index)}>Duplicate</button>
+
+                        <div className="input-container">
+                            <label className="mobile-label">Item Name:</label>
+                            <input
                                 type="text"
-                                placeholder="Item name"
                                 value={item.name}
                                 onChange={(e) => updateItem(index, 'name', e.target.value)}
                             />
-                        </FormField>
-                        
-                        <FormField>
-                            <label>Item Price</label>
-                            <Input
+                        </div>
+
+                        <div className="input-container">
+                            <label className="mobile-label">Item Price:</label>
+                            <input
                                 type="number"
-                                placeholder="0.00"
                                 value={item.price}
                                 onChange={(e) => updateItem(index, 'price', e.target.value)}
                             />
-                        </FormField>
-                    </FormRow>
-                    
-                    <Divider />
-                    
-                    <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                            <h4 style={{ margin: 0 }}>Split Between</h4>
-                            <Button 
-                                variant="secondary" 
-                                onClick={() => toggleAllMembers(index)}
-                                style={{ padding: '4px 12px', minHeight: '32px' }}
-                            >
-                                {item.members.every(member => member.included) ? 'Deselect All' : 'Select All'}
-                            </Button>
                         </div>
-                        
-                        <MemberList>
-                            {item.members.map(member => (
-                                <MemberChip 
-                                    key={member.id} 
-                                    included={member.included}
-                                    onClick={() => toggleMember(index, member.id)}
-                                >
-                                    {member.name}
-                                </MemberChip>
-                            ))}
-                        </MemberList>
+
+                        <button onClick={() => handleRemoveItem(index)}>Remove</button>
                     </div>
-                </ItemCard>
-            ))}
-            
-            {items.length > 0 && (
-                <div style={{ textAlign: 'center', margin: '20px 0' }}>
-                    <Button variant="secondary" onClick={handleAddItem}>
-                        + Add Another Item
-                    </Button>
+                    <div className="members-container">
+                        <label className="custom-checkbox">
+                            <input
+                                type="checkbox"
+                                checked={item.members.every(member => member.included)}
+                                onChange={() => toggleAllMembers(index)}
+                            />
+                            <span className="checkbox-label"></span> {/* For custom checkbox design */}
+                        </label>
+                        Toggle All&nbsp;
+                        {item.members.map(member => (
+                            <div key={member.id} className="member-checkbox">
+                                <label className="custom-checkbox">
+                                    <input
+                                        type="checkbox"
+                                        checked={member.included}
+                                        onChange={() => toggleMember(index, member.id)}
+                                    />
+                                    <span className="checkbox-label"></span> {/* For custom checkbox design */}
+                                </label>
+                                {member.name}
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            )}
-        </ItemListContainer>
+            ))}
+            {items.length > 0 && <button className="saveExpense" onClick={handleAddItem}>+ Add An Item</button>}
+        </div>
     );
 };
 
