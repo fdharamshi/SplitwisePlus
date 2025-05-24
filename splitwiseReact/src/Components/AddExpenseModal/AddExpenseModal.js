@@ -220,8 +220,9 @@ const ModalChildren = (props) => {
                 <div className="receipt-items">
                     {items.map((item, index) => {
                         const includedMembers = item.members ? item.members.filter(member => member.included) : [];
-                        const memberCount = includedMembers.length || 1; // Avoid division by zero
-                        const pricePerPerson = parseFloat(item.price || 0) / memberCount;
+                        // Calculate total shares for this item
+                        const totalShares = includedMembers.reduce((sum, member) => sum + (member.shares || 1), 0) || 1; // Avoid division by zero
+                        const pricePerShare = parseFloat(item.price || 0) / totalShares;
                         
                         return (
                             <ReceiptItem key={index}>
@@ -234,24 +235,42 @@ const ModalChildren = (props) => {
                                         <>
                                             <div style={{ marginBottom: '4px', color: theme.text.secondary }}>
                                                 <span style={{ color: theme.text.primary, fontWeight: 'normal' }}>
-                                                    ${pricePerPerson.toFixed(2)}
-                                                </span> per person
+                                                    ${pricePerShare.toFixed(2)}
+                                                </span> per share
                                             </div>
                                             
-                                            {/* Calculate per-person cost including tip and tax share */}
+                                            {/* Calculate per-share cost including tip and tax share */}
                                             {(tip > 0 || tax > 0) && (
                                                 <div style={{ marginBottom: '4px', color: theme.text.secondary }}>
                                                     <span style={{ color: theme.status.info, fontWeight: 'normal' }}>
-                                                        ${((parseFloat(item.price || 0) / getTotals()) * (tip + tax) / memberCount + pricePerPerson).toFixed(2)}
-                                                    </span> per person (Incl. Tip & Taxes)
+                                                        ${((parseFloat(item.price || 0) / getTotals()) * (tip + tax) / totalShares + pricePerShare).toFixed(2)}
+                                                    </span> per share (Incl. Tip & Taxes)
                                                 </div>
                                             )}
                                             
-                                            <div style={{ fontSize: '0.85rem', marginBottom: '2px' }}>
-                                                Split between: {includedMembers.map((member, i) => (
-                                                    <span key={member.id}>
-                                                        {member.name}{i < includedMembers.length - 1 ? ', ' : ''}
-                                                    </span>
+                                            <div style={{ fontSize: '0.85rem', marginBottom: '8px' }}>
+                                                Split between:
+                                            </div>
+                                            
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginLeft: '8px' }}>
+                                                {includedMembers.map((member, i) => (
+                                                    <div key={member.id} style={{ fontSize: '0.85rem', display: 'flex', justifyContent: 'space-between' }}>
+                                                        <span>
+                                                            {member.name} 
+                                                            {member.shares > 1 && (
+                                                                <span style={{ 
+                                                                    color: theme.status.info, 
+                                                                    fontWeight: 'bold',
+                                                                    marginLeft: '4px' 
+                                                                }}>
+                                                                    ({member.shares} shares)
+                                                                </span>
+                                                            )}
+                                                        </span>
+                                                        <span style={{ color: theme.text.primary }}>
+                                                            ${(pricePerShare * (member.shares || 1)).toFixed(2)}
+                                                        </span>
+                                                    </div>
                                                 ))}
                                             </div>
                                         </>

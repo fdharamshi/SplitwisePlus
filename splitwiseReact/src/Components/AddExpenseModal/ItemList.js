@@ -13,6 +13,7 @@ import {
   ItemTitle,
   MemberList,
   MemberChip,
+  ShareButton,
   Divider,
   TotalAmount
 } from './ItemList.styles';
@@ -148,18 +149,36 @@ const ItemList = ({groupMembers, saveExpense, onItemsChange}) => {
             const itemTip = new Decimal(tip).times(itemProportion);
             const itemTotalCost = itemCost.plus(itemTax).plus(itemTip);
 
-            // Calculate and update each included member's cost
-            item.members.forEach(member => {
-                if (member.included) {
-                    const memberCost = memberCosts.get(member.id);
-                    const memberShare = itemTotalCost.dividedBy(item.members.filter(m => m.included).length);
-                    memberCost.totalCost = memberCost.totalCost.plus(memberShare);
-                    memberCost.tipShare = memberCost.tipShare.plus(itemTip.dividedBy(item.members.filter(m => m.included).length));
-                    memberCost.taxShare = memberCost.taxShare.plus(itemTax.dividedBy(item.members.filter(m => m.included).length));
-                    memberCost.owedShare = memberCost.owedShare.plus(memberShare);
-                    memberCosts.set(member.id, memberCost);
-                }
-            });
+            // Calculate total shares for this item
+            const totalShares = item.members
+                .filter(m => m.included)
+                .reduce((sum, m) => sum + (m.shares || 1), 0);
+                
+            if (totalShares > 0) {
+                // Calculate cost per share
+                const costPerShare = itemTotalCost.dividedBy(totalShares);
+                const tipPerShare = itemTip.dividedBy(totalShares);
+                const taxPerShare = itemTax.dividedBy(totalShares);
+                
+                // Calculate and update each included member's cost based on their shares
+                item.members.forEach(member => {
+                    if (member.included) {
+                        const memberCost = memberCosts.get(member.id);
+                        const memberShares = member.shares || 1;
+                        
+                        // Multiply by number of shares
+                        const memberShare = costPerShare.times(memberShares);
+                        const memberTipShare = tipPerShare.times(memberShares);
+                        const memberTaxShare = taxPerShare.times(memberShares);
+                        
+                        memberCost.totalCost = memberCost.totalCost.plus(memberShare);
+                        memberCost.tipShare = memberCost.tipShare.plus(memberTipShare);
+                        memberCost.taxShare = memberCost.taxShare.plus(memberTaxShare);
+                        memberCost.owedShare = memberCost.owedShare.plus(memberShare);
+                        memberCosts.set(member.id, memberCost);
+                    }
+                });
+            }
         });
 
         // Calculate discrepancy and adjust the first included member's share
@@ -210,7 +229,8 @@ const ItemList = ({groupMembers, saveExpense, onItemsChange}) => {
         return sortedGroupMembers.map(member => ({
             id: member.id,
             included: false,
-            name: `${member.first_name} ${member.last_name ? member.last_name : ''}`
+            name: `${member.first_name} ${member.last_name ? member.last_name : ''}`,
+            shares: 1 // Default to 1 share per person
         }));
     };
 
@@ -227,7 +247,36 @@ const ItemList = ({groupMembers, saveExpense, onItemsChange}) => {
         const newItems = [...items];
         const memberIndex = newItems[itemIndex].members.findIndex(m => m.id === memberId);
         newItems[itemIndex].members[memberIndex].included = !newItems[itemIndex].members[memberIndex].included;
+        
+        // Reset shares to 1 when toggling off
+        if (!newItems[itemIndex].members[memberIndex].included) {
+            newItems[itemIndex].members[memberIndex].shares = 1;
+        }
+        
         setItems(newItems);
+    };
+    
+    const increaseShares = (itemIndex, memberId) => {
+        const newItems = [...items];
+        const memberIndex = newItems[itemIndex].members.findIndex(m => m.id === memberId);
+        
+        // Only increase shares if the member is included
+        if (newItems[itemIndex].members[memberIndex].included) {
+            newItems[itemIndex].members[memberIndex].shares += 1;
+            setItems(newItems);
+        }
+    };
+    
+    const decreaseShares = (itemIndex, memberId) => {
+        const newItems = [...items];
+        const memberIndex = newItems[itemIndex].members.findIndex(m => m.id === memberId);
+        
+        // Only decrease shares if greater than 1 and member is included
+        if (newItems[itemIndex].members[memberIndex].included && 
+            newItems[itemIndex].members[memberIndex].shares > 1) {
+            newItems[itemIndex].members[memberIndex].shares -= 1;
+            setItems(newItems);
+        }
     };
 
     const updateItemsFromReceipt = (parsedItems) => {
@@ -405,9 +454,42 @@ const ItemList = ({groupMembers, saveExpense, onItemsChange}) => {
                                 <MemberChip 
                                     key={member.id} 
                                     included={member.included}
-                                    onClick={() => toggleMember(index, member.id)}
                                 >
-                                    {member.name}
+                                    <span 
+                                        className="member-name" 
+                                        onClick={() => toggleMember(index, member.id)}
+                                    >
+                                        {member.name}
+                                    </span>
+                                    
+                                    {member.included && (
+                                        <div className="share-controls">
+                                            <ShareButton 
+                                                type="decrease" 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    decreaseShares(index, member.id);
+                                                }}
+                                                disabled={member.shares <= 1}
+                                            >
+                                                -
+                                            </ShareButton>
+                                            
+                                            <div className="share-count">
+                                                {member.shares}
+                                            </div>
+                                            
+                                            <ShareButton 
+                                                type="increase" 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    increaseShares(index, member.id);
+                                                }}
+                                            >
+                                                +
+                                            </ShareButton>
+                                        </div>
+                                    )}
                                 </MemberChip>
                             ))}
                         </MemberList>

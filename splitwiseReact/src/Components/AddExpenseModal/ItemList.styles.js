@@ -167,6 +167,37 @@ export const MemberList = styled.div`
   margin-top: ${({ theme }) => theme.spacing.sm};
 `;
 
+export const ShareButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background-color: ${({ theme, type }) => 
+    type === 'increase' ? 'rgba(76, 175, 80, 0.3)' : 'rgba(244, 67, 54, 0.3)'};
+  color: ${({ theme, type }) => 
+    type === 'increase' ? theme.status.success : theme.status.error};
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  margin: 0 4px;
+  padding: 0;
+  line-height: 1;
+  
+  &:hover {
+    background-color: ${({ theme, type }) => 
+      type === 'increase' ? 'rgba(76, 175, 80, 0.5)' : 'rgba(244, 67, 54, 0.5)'};
+  }
+  
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+`;
+
 export const MemberChip = styled.div`
   display: inline-flex;
   align-items: center;
@@ -174,9 +205,9 @@ export const MemberChip = styled.div`
     included || active ? theme.background.button : theme.background.tertiary};
   color: ${({ theme, included, active }) => included || active ? 'white' : theme.text.primary};
   border-radius: 20px;
-  padding: ${({ theme }) => `${theme.spacing.sm} ${theme.spacing.md}`};
+  padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.sm}`};
+  padding-right: ${({ theme, included }) => included ? theme.spacing.xs : theme.spacing.sm};
   font-size: 0.9rem;
-  cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid ${({ theme, included, active }) => 
     included || active ? theme.background.buttonHover : theme.ui.border};
@@ -184,7 +215,7 @@ export const MemberChip = styled.div`
     included || active ? theme.shadow.small : 'none'};
   margin: 4px;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   
   &:hover {
     background-color: ${({ theme, included, active }) => 
@@ -206,6 +237,30 @@ export const MemberChip = styled.div`
     width: 4px;
     background-color: ${({ theme, included, active }) => 
       included || active ? theme.status.success : 'transparent'};
+  }
+  
+  .member-name {
+    margin: 0 ${({ theme }) => theme.spacing.xs};
+    cursor: pointer;
+  }
+  
+  .share-count {
+    background-color: ${({ theme }) => theme.background.tertiary};
+    color: ${({ theme }) => theme.text.primary};
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    margin-left: 4px;
+  }
+  
+  .share-controls {
+    display: flex;
+    align-items: center;
+    margin-left: 4px;
   }
 `;
 
