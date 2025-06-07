@@ -276,7 +276,24 @@ const ModalChildren = (props) => {
                                             {(tip > 0 || tax > 0) && (
                                                 <div style={{ marginBottom: '4px', color: theme.text.secondary }}>
                                                     <span style={{ color: theme.status.info, fontWeight: 'normal' }}>
-                                                        ${((parseFloat(item.price || 0) / getTotals()) * (tip + tax) / totalShares + pricePerShare).toFixed(2)}
+                                                        ${(() => {
+                                                            // Calculate item's proportion of total bill
+                                                            const itemPrice = parseFloat(item.price || 0);
+                                                            const totalItems = getTotals();
+                                                            const itemProportion = totalItems > 0 ? (itemPrice / totalItems) : 0;
+                                                            
+                                                            // Calculate tip and tax portion for this item
+                                                            const itemTipPortion = itemProportion * parseFloat(tip || 0);
+                                                            const itemTaxPortion = itemProportion * parseFloat(tax || 0);
+                                                            
+                                                            // Calculate total cost for this item including tip and tax
+                                                            const itemTotalWithTipTax = itemPrice + itemTipPortion + itemTaxPortion;
+                                                            
+                                                            // Calculate per share amount
+                                                            const perShareWithTipTax = totalShares > 0 ? (itemTotalWithTipTax / totalShares) : 0;
+                                                            
+                                                            return perShareWithTipTax.toFixed(2);
+                                                        })()}
                                                     </span> per share (Incl. Tip & Taxes)
                                                 </div>
                                             )}

@@ -27,9 +27,9 @@ Decimal.config({
 
 const ItemList = ({ groupMembers, saveExpense, onItemsChange, isMobile = false }) => {
   const [items, setItems] = useState([]);
-  const [tip, setTip] = useState(0.0);
-  const [tax, setTax] = useState(0.0);
-  const [selectedPayer, setSelectedPayer] = useState('');
+  const [tip, setTip] = useState('');
+  const [tax, setTax] = useState('');
+  const [payers, setPayers] = useState([]);  // Array of {id, amount} objects for multiple payers
   const [description, setDescription] = useState('');
   const [newItemName, setNewItemName] = useState('');
   const [newItemPrice, setNewItemPrice] = useState('');
@@ -39,6 +39,8 @@ const ItemList = ({ groupMembers, saveExpense, onItemsChange, isMobile = false }
   const mobileDetected = useMediaQuery('(max-width: 768px)');
   const isOnMobile = isMobile || mobileDetected;
 
+  console.log(groupMembers);
+
   // Update parent component whenever items, tip, tax, or description change
   useEffect(() => {
     if (onItemsChange) {
@@ -46,8 +48,25 @@ const ItemList = ({ groupMembers, saveExpense, onItemsChange, isMobile = false }
     }
   }, [items, tip, tax, description, onItemsChange]);
 
-  const handlePayerChange = (event) => {
-    setSelectedPayer(event.target.value);
+  const handleAddPayer = (event) => {
+    const payerId = event.target.value;
+    if (payerId && !payers.some(p => p.id === payerId)) {
+      // Get total bill amount
+      let totalBill = new Decimal(getDisplayTotal()).plus(new Decimal(getTaxValue())).plus(new Decimal(getTipValue())).toFixed(2);
+
+      // If this is the first payer, set them to pay the full amount
+      // Convert payerId to a number to ensure type consistency when comparing with member.id
+      const newPayer = { id: Number(payerId), amount: payers.length === 0 ? totalBill : '' };
+      setPayers([...payers, newPayer]);
+    }
+  };
+
+  const handleRemovePayer = (payerId) => {
+    setPayers(payers.filter(p => p.id !== payerId));
+  };
+
+  const handlePayerAmountChange = (payerId, amount) => {
+    setPayers(payers.map(p => p.id === payerId ? { ...p, amount } : p));
   };
 
   const handleDescriptionChange = (event) => {
@@ -55,11 +74,11 @@ const ItemList = ({ groupMembers, saveExpense, onItemsChange, isMobile = false }
   };
 
   const handleTaxChange = (event) => {
-    setTax(parseFloat(event.target.value) || 0);
+    setTax(event.target.value);
   };
 
   const handleTipChange = (event) => {
-    setTip(parseFloat(event.target.value) || 0);
+    setTip(event.target.value);
   };
 
   const handleNewItemNameChange = (event) => {
@@ -194,19 +213,93 @@ const ItemList = ({ groupMembers, saveExpense, onItemsChange, isMobile = false }
       return sum + itemPrice;
     }, 0);
   };
+  
+  // Safe version of getTotals that ensures we have a valid number for display
+  const getDisplayTotal = () => {
+    const total = getTotals();
+    return isNaN(total) ? 0 : total;
+  };
+  
+  // Safely parse tax/tip values
+  const getTaxValue = () => {
+    return parseFloat(tax) || 0;
+  };
+  
+  const getTipValue = () => {
+    return parseFloat(tip) || 0;
+  };
 
   function formatRequest() {
     const memberCosts = calculateMemberCost();
     const formattedRequest = {};
     let totalOwedShares = new Decimal(0);
 
-    let payerIndex = -1;
-
-    let totalBillWithTipTax = (new Decimal(0)).plus(new Decimal(tax)).plus(new Decimal(tip));
+    let totalBillWithTipTax = (new Decimal(0)).plus(new Decimal(getTaxValue())).plus(new Decimal(getTipValue()));
     items.forEach(item => {
       totalBillWithTipTax = totalBillWithTipTax.plus(new Decimal(item.price));
     });
+    
+    // Verify payer amounts or auto-distribute total if needed
+    let totalPaidAmount = new Decimal(0);
+    let adjustedPayers = [...payers];
+    
+    // If there are no payers, select the first group member
+    if (payers.length === 0 && groupMembers.length > 0) {
+      adjustedPayers = [{ id: groupMembers[0].id, amount: totalBillWithTipTax.toString() }];
+    }
+    // If there's only one payer, they pay the full amount
+    else if (payers.length === 1) {
+      adjustedPayers = [{ id: payers[0].id, amount: totalBillWithTipTax.toString() }];
+    }
+    // Calculate total of explicitly provided payer amounts for multiple payers
+    else if (payers.length > 1) {
+      payers.forEach(payer => {
+        if (payer.amount) {
+          totalPaidAmount = totalPaidAmount.plus(new Decimal(payer.amount));
+        }
+      });
+      
+      // If total paid amount doesn't match bill total, adjust as needed
+      if (!totalPaidAmount.equals(totalBillWithTipTax) && payers.length > 0) {
+        // If no payer amounts were provided, split evenly among all payers
+        if (totalPaidAmount.isZero()) {
+          const splitAmount = totalBillWithTipTax.dividedBy(payers.length).toFixed(2);
+          adjustedPayers = payers.map(p => ({ ...p, amount: splitAmount }));
+        }
+        // If amounts were provided but don't add up to total, adjust the first payer
+        else if (payers.some(p => p.amount)) {
+          const difference = totalBillWithTipTax.minus(totalPaidAmount);
+          // Find first payer with an amount
+          const firstPayerWithAmount = payers.find(p => p.amount);
+          if (firstPayerWithAmount) {
+            adjustedPayers = payers.map(p => {
+              if (p.id === firstPayerWithAmount.id) {
+                return {
+                  ...p,
+                  amount: new Decimal(p.amount).plus(difference).toFixed(2)
+                };
+              }
+              return p;
+            });
+          }
+          // If no payers have amounts, assign total to first payer
+          else if (payers.length > 0) {
+            adjustedPayers = payers.map((p, idx) => 
+              idx === 0 ? { ...p, amount: totalBillWithTipTax.toFixed(2) } : p
+            );
+          }
+        }
+      }
+    }
 
+    // Create a lookup for payer amounts
+    const payerAmounts = {};
+    adjustedPayers.forEach(payer => {
+      // Ensure payer.id is used as a string key in the object
+      payerAmounts[String(payer.id)] = payer.amount || "0";
+    });
+
+    // Process each group member
     groupMembers.forEach((member, index) => {
       const memberCost = memberCosts.get(member.id);
       // Ensure owedShare is rounded to 2 decimal places for consistency
@@ -220,10 +313,10 @@ const ItemList = ({ groupMembers, saveExpense, onItemsChange, isMobile = false }
       formattedRequest[`users__${index}__owed_share`] = owedShareRounded; // Use the rounded owedShare
       totalOwedShares = totalOwedShares.plus(new Decimal(owedShareRounded));
 
-      formattedRequest[`users__${index}__paid_share`] = "0";
-      if (member.id == selectedPayer) {
-        payerIndex = index;
-      }
+      // Set paid_share based on payer information
+      // Convert member.id to string to match the keys in payerAmounts
+      const paidShare = payerAmounts[String(member.id)] || "0";
+      formattedRequest[`users__${index}__paid_share`] = paidShare;
     });
 
     // Adjust for any discrepancy due to rounding in owed shares vs. total bill
@@ -240,13 +333,25 @@ const ItemList = ({ groupMembers, saveExpense, onItemsChange, isMobile = false }
     // Set the total cost and description in the request
     formattedRequest['cost'] = totalBillDecimal;
     formattedRequest['description'] = description;
-    formattedRequest[`users__${payerIndex}__paid_share`] = totalBillDecimal;
 
     // Construct the notes section
     let notes = "SplitwisePlus by Femin Dharamshi\nLearn More at https://github.com/fdharamshi/SplitwisePlus\n\n";
     notes += `Total Cost: ${Number(totalBillWithTipTax).toFixed(2)}\n`;
-    notes += `Total Tip: ${tip.toFixed(2)}\n`;
-    notes += `Total Tax: ${tax.toFixed(2)}\n\n`;
+    notes += `Total Tip: ${getTipValue().toFixed(2)}\n`;
+    notes += `Total Tax: ${getTaxValue().toFixed(2)}\n`;
+    
+    // Add payer information to notes
+    if (adjustedPayers.length > 0) {
+      notes += "\nPayers:\n";
+      adjustedPayers.forEach(payer => {
+        const member = groupMembers.find(m => m.id === payer.id);
+        if (member) {
+          notes += `- ${member.first_name} ${member.last_name || ''}: $${payer.amount}\n`;
+        }
+      });
+    }
+    
+    notes += "\n";
 
     notes += "Items:\n";
     items.forEach(item => {
@@ -255,7 +360,9 @@ const ItemList = ({ groupMembers, saveExpense, onItemsChange, isMobile = false }
         .map(member => member.name)
         .join("\n   ");
       const includedMembersCount = item.members.filter(member => member.included).length;
-      notes += `- ${item.name}: $${item.price} [Per Person: ${(Number(item.price) / includedMembersCount).toFixed(2)}]\n   ${includedMembers}\n`;
+      const itemPrice = parseFloat(item.price) || 0;
+      const perPersonAmount = includedMembersCount > 0 ? (itemPrice / includedMembersCount) : 0;
+      notes += `- ${item.name}: $${itemPrice.toFixed(2)} [Per Person: $${perPersonAmount.toFixed(2)}]\n   ${includedMembers}\n`;
     });
 
     notes += "\nMember Costs:\n";
@@ -291,8 +398,8 @@ const ItemList = ({ groupMembers, saveExpense, onItemsChange, isMobile = false }
     items.forEach(item => {
       const itemCost = new Decimal(item.price);
       const itemProportion = totalItemsCost.isZero() ? new Decimal(0) : itemCost.dividedBy(totalItemsCost);
-      const itemTax = new Decimal(tax).times(itemProportion);
-      const itemTip = new Decimal(tip).times(itemProportion);
+      const itemTax = new Decimal(getTaxValue()).times(itemProportion);
+      const itemTip = new Decimal(getTipValue()).times(itemProportion);
       const itemTotalCost = itemCost.plus(itemTax).plus(itemTip);
 
       // Calculate total shares for this item
@@ -365,15 +472,17 @@ const ItemList = ({ groupMembers, saveExpense, onItemsChange, isMobile = false }
         
         <FormRow>
           <FormField>
-            <label htmlFor="payer-select">Paid By</label>
+            <label htmlFor="payer-select">Add Payer</label>
             <Input
               as="select"
               id="payer-select" 
-              value={selectedPayer} 
-              onChange={handlePayerChange}
+              value="" 
+              onChange={handleAddPayer}
             >
               <option value="">Select a payer</option>
-              {groupMembers.map((member) => (
+              {groupMembers
+                .filter(member => !payers.some(p => p.id === member.id))
+                .map((member) => (
                 <option key={member.id} value={member.id}>
                   {member.first_name} {member.last_name}
                 </option>
@@ -382,32 +491,159 @@ const ItemList = ({ groupMembers, saveExpense, onItemsChange, isMobile = false }
           </FormField>
         </FormRow>
         
-        <FormRow stackOnMobile={false}>
+        {/* Display selected payers */}
+        {payers.length > 0 && (
+          <div style={{ marginTop: '10px', marginBottom: '10px' }}>
+            <label>Payers</label>
+            {payers.map((payer) => {
+              // Ensure payer.id is treated as a number for comparison
+              // Log for debugging purposes
+              console.log('Payer ID:', payer.id, typeof payer.id);
+              console.log('Group Members IDs:', groupMembers.map(m => ({ id: m.id, type: typeof m.id, name: m.first_name })));
+              
+              // Find the member matching this payer ID, ensuring type consistency
+              const member = groupMembers.find(m => Number(m.id) === Number(payer.id));
+              const payerName = member ? `${member.first_name} ${member.last_name || ''}` : 'Unknown';
+              
+              return (
+                <div key={payer.id} style={{
+                  marginTop: '8px',
+                  padding: '12px',
+                  backgroundColor: 'var(--input-bg-color, #333)',
+                  borderRadius: '4px'
+                }}>
+                  {/* Desktop layout (row) */}
+                  <div style={{
+                    display: isOnMobile ? 'none' : 'flex',
+                    alignItems: 'center',
+                    gap: '12px'
+                  }}>
+                    <div style={{ flex: 1, fontWeight: 'bold' }}>
+                      {payerName}
+                    </div>
+                    
+                    {/* Only show amount inputs when there are multiple payers */}
+                    {payers.length > 1 ? (
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <label htmlFor={`payer-amount-${payer.id}`} style={{ marginRight: '8px', fontSize: '0.9rem' }}>
+                          {payerName} paid:
+                        </label>
+                        <Input
+                          id={`payer-amount-${payer.id}`}
+                          type="number"
+                          placeholder="Amount"
+                          value={payer.amount}
+                          onChange={(e) => handlePayerAmountChange(payer.id, e.target.value)}
+                          min="0"
+                          step="0.01"
+                          style={{ width: '120px', marginRight: '8px' }}
+                        />
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '0.9rem', color: 'var(--text-color, #e0e0e0)' }}>
+                        Paying full amount
+                      </div>
+                    )}
+                    
+                    <Button 
+                      variant="danger" 
+                      onClick={() => handleRemovePayer(payer.id)}
+                      style={{ padding: '4px 8px', minHeight: '32px' }}
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                  
+                  {/* Mobile layout (column) */}
+                  <div style={{
+                    display: isOnMobile ? 'flex' : 'none',
+                    flexDirection: 'column',
+                    gap: '8px'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div style={{ fontWeight: 'bold' }}>
+                        {payerName}
+                      </div>
+                      <Button 
+                        variant="danger" 
+                        onClick={() => handleRemovePayer(payer.id)}
+                        style={{ padding: '4px 8px', minHeight: '32px' }}
+                      >
+                        ✕
+                      </Button>
+                    </div>
+                    
+                    {/* Only show amount inputs when there are multiple payers */}
+                    {payers.length > 1 ? (
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <label htmlFor={`payer-mobile-amount-${payer.id}`} style={{ marginRight: '8px', fontSize: '0.9rem' }}>
+                          Amount paid by {payerName}:
+                        </label>
+                        <Input
+                          id={`payer-mobile-amount-${payer.id}`}
+                          type="number"
+                          placeholder="Amount"
+                          value={payer.amount}
+                          onChange={(e) => handlePayerAmountChange(payer.id, e.target.value)}
+                          min="0"
+                          step="0.01"
+                          style={{ flex: 1 }}
+                        />
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '0.9rem', color: 'var(--text-color, #e0e0e0)' }}>
+                        Paying full amount
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        
+        <FormRow stackOnMobile={isOnMobile}>
           <FormField>
+            <label htmlFor="tax-input" style={{ 
+              display: 'block',
+              marginBottom: '5px',
+              fontSize: '0.9rem'
+            }}>Tax Amount ($)</label>
             <Input
-              type="number"
-              placeholder="Tax amount"
+              id="tax-input"
+              type="text"
+              inputMode="decimal"
+              placeholder="0.00"
               value={tax}
               onChange={handleTaxChange}
-              min="0"
-              step="0.01"
+              style={{ textAlign: 'right' }}
             />
           </FormField>
           <FormField>
+            <label htmlFor="tip-input" style={{ 
+              display: 'block',
+              marginBottom: '5px',
+              fontSize: '0.9rem'
+            }}>Tip Amount ($)</label>
             <Input
-              type="number"
-              placeholder="Tip amount"
+              id="tip-input"
+              type="text"
+              inputMode="decimal"
+              placeholder="0.00"
               value={tip}
               onChange={handleTipChange}
-              min="0"
-              step="0.01"
+              style={{ textAlign: 'right' }}
             />
           </FormField>
         </FormRow>
         
         <TotalAmount>
-          <div>Subtotal: <strong>${getTotals().toFixed(2)}</strong></div>
-          <div>Total with Tip & Tax: <strong>${(getTotals() + parseFloat(tip || 0) + parseFloat(tax || 0)).toFixed(2)}</strong></div>
+          <div>Subtotal: <strong>${getDisplayTotal().toFixed(2)}</strong></div>
+          <div>Total with Tip & Tax: <strong>${(getDisplayTotal() + getTipValue() + getTaxValue()).toFixed(2)}</strong></div>
         </TotalAmount>
       </FormSection>
       
@@ -421,7 +657,7 @@ const ItemList = ({ groupMembers, saveExpense, onItemsChange, isMobile = false }
         <Button variant="secondary" onClick={handleAddItem}>
           + Add New Item
         </Button>
-        <Button onClick={formatRequest} data-action="save-expense">
+        <Button onClick={formatRequest} data-action="save-expense" disabled={getTotals() <= 0 || payers.length === 0}>
           Save Expense
         </Button>
       </div>
@@ -437,12 +673,12 @@ const ItemList = ({ groupMembers, saveExpense, onItemsChange, isMobile = false }
         </FormField>
         <FormField>
           <Input
-            type="number"
-            placeholder="Price"
+            type="text"
+            inputMode="decimal"
+            placeholder="0.00"
             value={newItemPrice}
             onChange={handleNewItemPriceChange}
-            min="0"
-            step="0.01"
+            style={{ textAlign: 'right' }}
           />
         </FormField>
         <Button
@@ -494,12 +730,12 @@ const ItemList = ({ groupMembers, saveExpense, onItemsChange, isMobile = false }
             
             <FormField>
               <Input
-                type="number"
-                placeholder="Price"
+                type="text"
+                inputMode="decimal"
+                placeholder="0.00"
                 value={item.price}
                 onChange={(e) => updateItem(index, 'price', e.target.value)}
-                min="0"
-                step="0.01"
+                style={{ textAlign: 'right' }}
               />
             </FormField>
           </FormRow>
