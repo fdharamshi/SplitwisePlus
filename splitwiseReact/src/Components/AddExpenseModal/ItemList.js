@@ -334,15 +334,27 @@ const ItemList = ({ groupMembers, saveExpense, onItemsChange, isMobile = false }
     formattedRequest['cost'] = totalBillDecimal;
     formattedRequest['description'] = description;
 
-    // Construct the notes section
-    let notes = "SplitwisePlus by Femin Dharamshi\nLearn More at https://github.com/fdharamshi/SplitwisePlus\n\n";
-    notes += `Total Cost: ${Number(totalBillWithTipTax).toFixed(2)}\n`;
-    notes += `Total Tip: ${getTipValue().toFixed(2)}\n`;
-    notes += `Total Tax: ${getTaxValue().toFixed(2)}\n`;
-    
+    // Unicode bold for section titles (Mathematical Bold, not markdown)
+    const bold = {
+      totalCost: '𝗧𝗼𝘁𝗮𝗹 𝗖𝗼𝘀𝘁',
+      tip: '𝗧𝗶𝗽',
+      tax: '𝗧𝗮𝘅',
+      payers: '𝗣𝗮𝘆𝗲𝗿𝘀',
+      items: '𝗜𝘁𝗲𝗺𝘀',
+      memberCosts: '𝗠𝗲𝗺𝗯𝗲𝗿 𝗖𝗼𝘀𝘁𝘀',
+    };
+
+    // Construct the visually enhanced notes section with emojis and bold section titles
+    let notes = "💸 SplitwisePlus by Femin Dharamshi\n";
+    notes += "🔗 Learn More: https://github.com/fdharamshi/SplitwisePlus\n\n";
+    notes += "🤝 We split tip and tax fairly—everyone pays their share based on what they ordered, so it’s always balanced and kind to all!\n\n";
+    notes += `🧾 ${bold.totalCost}: $${Number(totalBillWithTipTax).toFixed(2)}\n`;
+    notes += `💁‍♂️ ${bold.tip}: $${getTipValue().toFixed(2)}\n`;
+    notes += `🧾 ${bold.tax}: $${getTaxValue().toFixed(2)}\n`;
+
     // Add payer information to notes
     if (adjustedPayers.length > 0) {
-      notes += "\nPayers:\n";
+      notes += `\n💰 ${bold.payers}:\n`;
       adjustedPayers.forEach(payer => {
         const member = groupMembers.find(m => m.id === payer.id);
         if (member) {
@@ -350,24 +362,28 @@ const ItemList = ({ groupMembers, saveExpense, onItemsChange, isMobile = false }
         }
       });
     }
-    
-    notes += "\n";
 
-    notes += "Items:\n";
+    notes += `\n🛒 ${bold.items}:\n`;
     items.forEach(item => {
+      // For each included member, show share count if >1
       const includedMembers = item.members
         .filter(member => member.included)
-        .map(member => member.name)
-        .join("\n   ");
-      const includedMembersCount = item.members.filter(member => member.included).length;
+        .map(member => {
+          const shares = member.shares || 1;
+          return shares > 1
+            ? `${member.name} (${shares} shares)`
+            : `${member.name}`;
+        })
+        .join("\n   👤 ");
+      const includedMembersCount = item.members.filter(member => member.included).reduce((sum, m) => sum + (m.shares || 1), 0);
       const itemPrice = parseFloat(item.price) || 0;
-      const perPersonAmount = includedMembersCount > 0 ? (itemPrice / includedMembersCount) : 0;
-      notes += `- ${item.name}: $${itemPrice.toFixed(2)} [Per Person: $${perPersonAmount.toFixed(2)}]\n   ${includedMembers}\n`;
+      const perShareAmount = includedMembersCount > 0 ? (itemPrice / includedMembersCount) : 0;
+      notes += `- ${item.name}: $${itemPrice.toFixed(2)} [Per Share: $${perShareAmount.toFixed(2)}]\n   👤 ${includedMembers}\n`;
     });
 
-    notes += "\nMember Costs:\n";
+    notes += `\n👥 ${bold.memberCosts}:\n`;
     memberCosts.forEach((value, key) => {
-      notes += `- ${value.name}:\n   Total Cost $${value.totalCost.toFixed(2)}\n   Tip $${value.tipShare.toFixed(2)}\n   Tax $${value.taxShare.toFixed(2)}\n\n`;
+      notes += `- ${value.name}:\n   💵 Total: $${value.totalCost.toFixed(2)}\n   💁‍♂️ Tip: $${value.tipShare.toFixed(2)}\n   🧾 Tax: $${value.taxShare.toFixed(2)}\n\n`;
     });
 
     formattedRequest['details'] = notes;
